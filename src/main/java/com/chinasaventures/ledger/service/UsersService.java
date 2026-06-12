@@ -30,8 +30,8 @@ public class UsersService {
             Users existing = getUserById(id);
             existing.setName(updatedUsers.getName());
             existing.setRole(updatedUsers.getRole());
-//            existing.setPhoneNumber(updatedPhoneNumber.getPhoneNumber());
-//            existing.setBranch(updatedBranch.getUpdatedBranch);
+            existing.setPhoneNumber(updatedUsers.getPhoneNumber());
+            existing.setBranch(updatedUsers.getBranch());
             return userRepository.save(existing);
         }
 

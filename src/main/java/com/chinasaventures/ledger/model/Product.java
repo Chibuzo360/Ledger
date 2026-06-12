@@ -2,6 +2,8 @@ package com.chinasaventures.ledger.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -19,8 +21,12 @@ public class Product {
     @Column(nullable = false)
     private String unit;
 
+    @Column(nullable = false)
+    private BigDecimal pricePerUnit = BigDecimal.ZERO;
+
     @Column(name = "current_stock")
     private Integer currentStock = 0;
+
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
