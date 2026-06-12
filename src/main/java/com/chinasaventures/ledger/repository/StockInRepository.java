@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 
-public interface StockInRepository {
+public interface StockInRepository extends JpaRepository<StockIn, Long>{
 }

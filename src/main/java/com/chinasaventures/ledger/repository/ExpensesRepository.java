@@ -1,4 +1,7 @@
 package com.chinasaventures.ledger.repository;
 
-public interface ExpensesRepository  {
+import com.chinasaventures.ledger.model.Expenses;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ExpensesRepository  extends JpaRepository<Expenses, Long> {
 }
