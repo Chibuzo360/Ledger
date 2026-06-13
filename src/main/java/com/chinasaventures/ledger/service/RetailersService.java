@@ -34,7 +34,7 @@ public class RetailersService {
         existing.setContactName(updatedRetailers.getContactName());
         existing.setPhone(updatedRetailers.getPhone());
         existing.setTotalOwed(updatedRetailers.getTotalOwed());
-        existing.setCreditLimit(updatedRetailers.getCreditLimit());
+        existing.setCreditLimit(updatedRetailers.getCreditLimit());// this might be removed later
         return retailersRepository.save(existing);
     }
 
