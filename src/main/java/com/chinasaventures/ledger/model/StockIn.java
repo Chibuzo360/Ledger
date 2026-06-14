@@ -18,7 +18,7 @@ public class StockIn {
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "branch_id", nullable = false)
+    @JoinColumn(name = "branch_id", nullable = false)// At first, this will only be used for the one particular shop to prevent confusion.
     private Branch branch;
 
     @Column(nullable = false)

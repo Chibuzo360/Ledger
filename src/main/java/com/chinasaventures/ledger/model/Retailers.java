@@ -27,10 +27,10 @@ public class Retailers {
     private String address;
 
     @Column(name = "credit_limit",nullable = false)
-    private BigDecimal creditLimit = BigDecimal.valueOf(0.00);
+    private BigDecimal creditLimit = BigDecimal.valueOf(0.00);// I might remove this later.
 
-    @Column(name = "total_owed", nullable = false)
-    private BigDecimal totalOwed = BigDecimal.valueOf(0.00);
+    @Column(name = "balance", nullable = false)
+    private BigDecimal balance = BigDecimal.valueOf(0.00);
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "branch_id", nullable = false)
@@ -41,4 +41,8 @@ public class Retailers {
 
     @PrePersist
     protected void onCreate(){createdAt = LocalDateTime.now();}
+
+    // we could add the total amount the customer has spent in the business
+    // we could also add the last payment date and the last payment amount.
+    //
 }

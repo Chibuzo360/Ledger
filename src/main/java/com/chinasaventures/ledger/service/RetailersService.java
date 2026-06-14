@@ -33,7 +33,7 @@ public class RetailersService {
         existing.setBusinessName(updatedRetailers.getBusinessName());
         existing.setContactName(updatedRetailers.getContactName());
         existing.setPhone(updatedRetailers.getPhone());
-        existing.setTotalOwed(updatedRetailers.getTotalOwed());
+        existing.setBalance(updatedRetailers.getBalance());
         existing.setCreditLimit(updatedRetailers.getCreditLimit());// this might be removed later
         return retailersRepository.save(existing);
     }
