@@ -27,7 +27,7 @@ public class TransactionsService {
                 .orElseThrow(() -> new RuntimeException("Transaction not found with id: "+ id));
     }
 
-    public Transactions createTransaction(Transactions transaction){
+    public Transactions addTransaction(Transactions transaction){
 
         BigDecimal debt = transaction.getTotalAmount()
                 .subtract(transaction.getAmountPaid());
@@ -41,7 +41,7 @@ public class TransactionsService {
         }
 
         return transactionsRepository.save(transaction);
-    }
+    } // changed it from createTransaction to addTransaction
 
     public void deleteTransaction(Long id){
         transactionsRepository.deleteById(id);

@@ -11,17 +11,17 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class TranscationItemService {
+public class TransactionItemService {
     private final TransactionItemRepository transactionItemRepository;
     private final ProductRepository productRepository;
 
-    public List<TransactionItem> getAllTransactionItem(){
+    public List<TransactionItem> getAllTransactionItems(){
         return transactionItemRepository.findAll();
     }
 
     public List<TransactionItem> getItemsByTransactionId(Long transactionId){
         return transactionItemRepository.findByTransactionId(transactionId);
-    }
+    }// check why this is a wrapped in list. probably because it is listing transaction items
 
     public TransactionItem getTransactionItemById(Long id){
         return transactionItemRepository.findById(id)

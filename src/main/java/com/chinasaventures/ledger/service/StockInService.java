@@ -17,6 +17,7 @@ public class StockInService {
     private final ProductRepository productRepository;
 
     public List<StockIn> getAllStockIn() {
+
         return stockInRepository.findAll();
     }
 
@@ -25,7 +26,7 @@ public class StockInService {
                 .orElseThrow(() -> new RuntimeException("StockIn not found with id: "+ id));
     }
 
-    public StockIn createStockIn(StockIn stockIn){
+    public StockIn addStockIn(StockIn stockIn){
         StockIn saved = stockInRepository.save(stockIn);
 
         Product product = saved.getProduct();
@@ -33,9 +34,10 @@ public class StockInService {
         productRepository.save(product);
 
         return saved;
-    }
+    }// I renamed this from "createStockIn to addStockIn"
 
     public void deleteStockIn(Long id){
+
         stockInRepository.deleteById(id);
     }
 }

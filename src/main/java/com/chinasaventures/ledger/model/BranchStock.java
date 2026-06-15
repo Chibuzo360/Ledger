@@ -3,41 +3,23 @@
 //import jakarta.persistence.*;
 //import lombok.Data;
 //
-//import java.math.BigDecimal;
-//import java.time.LocalDateTime;
-//
 //@Data
 //@Entity
-//@Table(name = "master_stock")
-//
+//@Table(name = "branch_stock")
 //public class BranchStock {
+//
 //    @Id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private  Long id;
+//    private Long id;
 //
-//    @Column(nullable = false, name = "product_name")
-//    private String productName;
-//
-//    @Column(nullable = false)
-//    private String unit;
-//
-//   @ManyToOne(fetch = FetchType.LAZY)
+//    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "branch_id", nullable = false)
 //    private Branch branch;
 //
-//    @Column(name = "total_current_stock")
-//    private Integer totalCurrentStock = 0;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "product_id", nullable = false)
+//    private Product product;
 //
-//
-//    @Column(name = "created_at")
-//    private LocalDateTime createdAt;
-//
-//    @PrePersist
-//    protected void onCreate(){
-//        createdAt = LocalDateTime.now();
-//    }
-//
-//
+//    @Column(nullable = false)
+//    private Integer quantity = 0;
 //}
-
-//THIS FILE IS INTENDED FOR TESTING THE MASTER LEDGER WHERE THE TOTAL GOODS AVAILABLE FOR ALL BRANCHES CAN BE SEEN.

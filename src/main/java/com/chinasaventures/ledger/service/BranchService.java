@@ -22,7 +22,7 @@ public class BranchService {
                 .orElseThrow(() -> new RuntimeException("Branch not found with id: "+ id));
     }
 
-    public Branch createProduct(Branch branch){
+    public Branch createBranch(Branch branch){
         return branchRepository.save(branch);
     }
 

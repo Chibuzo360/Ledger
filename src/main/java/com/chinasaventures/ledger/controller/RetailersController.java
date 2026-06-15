@@ -3,18 +3,17 @@ package com.chinasaventures.ledger.controller;
 import com.chinasaventures.ledger.model.Retailers;
 import com.chinasaventures.ledger.service.RetailersService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/retailers")
 @RequiredArgsConstructor
 public class RetailersController {
 
-    private RetailersService retailersService;
+    private final RetailersService retailersService;
 
     @GetMapping
     public ResponseEntity<List<Retailers>> getAllRetailers(){
@@ -37,7 +36,7 @@ public class RetailersController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Retailers> deleteRetailer(@PathVariable Long id){
+    public ResponseEntity<Void> deleteRetailer(@PathVariable Long id){
         retailersService.deleteRetailer(id);
         return ResponseEntity.noContent().build();
     }
