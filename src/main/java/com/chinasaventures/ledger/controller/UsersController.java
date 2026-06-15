@@ -47,3 +47,5 @@ public class UsersController {
         return ResponseEntity.noContent().build();
     }
 }
+
+//everything concerning branchstock can wait for now.  maybe after i finish building the core parts i would add it. i only  wrote the model,repo and controller, then commented the codes in it. i didnt modify any file to connect it, i will do those later

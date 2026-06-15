@@ -31,6 +31,15 @@ public class TransactionsController {
         return ResponseEntity.ok(transactionsService.addTransaction(transaction));
     }
 
+    @PutMapping("/{id}/confirm")
+    public ResponseEntity<Transactions> confirmPayment(
+            @PathVariable Long id,
+            @RequestParam String paymentProof,
+            @RequestParam Long confirmedById) {
+        return ResponseEntity.ok(
+                transactionsService.confirmPayment(id, paymentProof, confirmedById));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTransaction(@PathVariable Long id){
          transactionsService.deleteTransaction(id);

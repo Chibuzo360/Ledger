@@ -23,10 +23,10 @@ public class TransactionItemsController {
         return ResponseEntity.ok(transactionItemService.getAllTransactionItems());
     }
 
-    @GetMapping("/{transactionId}")
-    public ResponseEntity<TransactionItem> getItemsByTransactionId(@PathVariable Long transactionId){
-        return ResponseEntity.ok(transactionItemService.getTransactionItemById(transactionId));
-    }// recheck this line if wrapping <TransactionItem> in List<> is necessary
+    @GetMapping("/transaction/{transactionId}")
+    public ResponseEntity<List<TransactionItem>> getItemsByTransactionId(@PathVariable Long transactionId){
+        return ResponseEntity.ok(transactionItemService.getItemsByTransactionId(transactionId));
+    }// I fixed the problem, it was from the "getItemsBy..." in the Response entity.ok
 
     @GetMapping("/{id}")
     public ResponseEntity<TransactionItem> getTransactionItemsById(@PathVariable Long id){

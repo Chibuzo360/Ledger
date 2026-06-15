@@ -21,7 +21,7 @@ public class TransactionItemService {
 
     public List<TransactionItem> getItemsByTransactionId(Long transactionId){
         return transactionItemRepository.findByTransactionId(transactionId);
-    }// check why this is a wrapped in list. probably because it is listing transaction items
+    }
 
     public TransactionItem getTransactionItemById(Long id){
         return transactionItemRepository.findById(id)

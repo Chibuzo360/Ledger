@@ -5,6 +5,8 @@ import com.chinasaventures.ledger.model.Transactions;
 import com.chinasaventures.ledger.repository.TransactionItemRepository;
 import com.chinasaventures.ledger.repository.TransactionsRepository;
 import com.chinasaventures.ledger.repository.ProductRepository;
+import com.chinasaventures.ledger.model.Users;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +44,20 @@ public class TransactionsService {
 
         return transactionsRepository.save(transaction);
     } // changed it from createTransaction to addTransaction
+
+    public Transactions confirmPayment(Long id, String paymentProof, Long confirmedById) {
+        Transactions transaction = getTransactionById(id);
+
+        transaction.setPaymentStatus("confirmed");
+        transaction.setPaymentProof(paymentProof);
+        transaction.setConfirmedAt(LocalDateTime.now());
+
+        Users confirmedBy = new Users();
+        confirmedBy.setId(confirmedById);
+        transaction.setConfirmedBy(confirmedBy);
+
+        return transactionsRepository.save(transaction);
+    }
 
     public void deleteTransaction(Long id){
         transactionsRepository.deleteById(id);
