@@ -3,8 +3,9 @@ package com.chinasaventures.ledger.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
+
 
 @Data
 @Entity
@@ -21,8 +22,12 @@ public class Product {
     @Column(nullable = false)
     private String unit;
 
-    @Column(nullable = false)
-    private BigDecimal pricePerUnit = BigDecimal.ZERO;
+//    @Column(nullable = false)
+//    private BigDecimal pricePerUnit = BigDecimal.ZERO;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private ProductCategory category; // Cement, Rod, Tiles.
 
     @Column(name = "current_stock")
     private Integer currentStock = 0;

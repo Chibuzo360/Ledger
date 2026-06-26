@@ -19,7 +19,8 @@ public class ProductController {
 
         @GetMapping
         public ResponseEntity<List<Product>> getAllProducts() {
-            return ResponseEntity.ok(productService.getAllProducts());
+        System.out.println("GET /api/products reached");
+        return ResponseEntity.ok(productService.getAllProducts());
         }
 
         @GetMapping("/{id}")

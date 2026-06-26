@@ -3,6 +3,7 @@ package com.chinasaventures.ledger.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+
 @Data
 @Entity
 @Table(name = "transaction_items")
@@ -17,8 +18,8 @@ public class TransactionItem {
     private Transactions transaction;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @JoinColumn(name = "product_variant_id")
+    private ProductVariants productVariant;
 
     @Column(name = "quantity_ordered", nullable = false)
     private Integer quantityOrdered;

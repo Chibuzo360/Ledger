@@ -30,7 +30,6 @@ public class ProductService {
         existing.setName(updatedProduct.getName());
         existing.setUnit(updatedProduct.getUnit());
         existing.setCurrentStock(updatedProduct.getCurrentStock());
-        existing.setPricePerUnit(updatedProduct.getPricePerUnit());
         return productRepository.save(existing);
     }
 

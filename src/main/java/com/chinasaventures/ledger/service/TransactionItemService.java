@@ -1,5 +1,7 @@
 package com.chinasaventures.ledger.service;
 
+import com.chinasaventures.ledger.model.ProductVariants;
+import com.chinasaventures.ledger.repository.ProductVariantsRepository;
 import com.chinasaventures.ledger.repository.TransactionItemRepository;
 import com.chinasaventures.ledger.model.TransactionItem;
 import com.chinasaventures.ledger.model.Product;
@@ -13,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransactionItemService {
     private final TransactionItemRepository transactionItemRepository;
-    private final ProductRepository productRepository;
+    private final ProductVariantsRepository productVariantsRepository;
 
     public List<TransactionItem> getAllTransactionItems(){
         return transactionItemRepository.findAll();
@@ -31,9 +33,9 @@ public class TransactionItemService {
     public TransactionItem addTransactionItem(TransactionItem transactionItem){
         TransactionItem saved = transactionItemRepository.save(transactionItem);
 
-        Product product = saved.getProduct();
+        ProductVariants product = saved.getProductVariant();
         product.setCurrentStock(product.getCurrentStock() - saved.getQuantitySupplied());
-        productRepository.save(product);
+        productVariantsRepository.save(product);
         return saved;
     }
 

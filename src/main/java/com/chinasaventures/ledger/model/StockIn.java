@@ -14,7 +14,11 @@ public class StockIn {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_variant_id")
+    private ProductVariants productVariant;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product")
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)

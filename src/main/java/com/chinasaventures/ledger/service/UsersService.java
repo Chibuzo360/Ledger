@@ -4,6 +4,7 @@ import com.chinasaventures.ledger.model.Users;
 import com.chinasaventures.ledger.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
 public class UsersService {
 
         private final UsersRepository userRepository;
+        private final PasswordEncoder passwordEncoder;
 
         public List<Users> getAllUsers() {
             return userRepository.findAll();
@@ -23,6 +25,7 @@ public class UsersService {
         }
 
         public Users createUser(Users user){
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             return userRepository.save(user);
         }
 
@@ -32,6 +35,7 @@ public class UsersService {
             existing.setRole(updatedUsers.getRole());
             existing.setPhoneNumber(updatedUsers.getPhoneNumber());
             existing.setBranch(updatedUsers.getBranch());
+            existing.setEmail(updatedUsers.getEmail());
             return userRepository.save(existing);
         }
 
@@ -41,7 +45,8 @@ public class UsersService {
 
         public Users updatePassword (Long id, String newPassword){
             Users existing = getUserById(id);
-            existing.setPassword(newPassword);
+//            existing.setPassword(newPassword);
+            existing.setPassword(passwordEncoder.encode(newPassword));// Incase we need to see everyones password to the database, this is te scrambler
             return userRepository.save(existing);
 
         }
