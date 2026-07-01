@@ -72,3 +72,6 @@ public class JwtUtil {
 
 
 }
+//This part of the code provide us with the necessary tools we need for filtering (getting a sign key,
+// generating tokens, extracting information from tokens(role), extracting identifier from token,
+// checking if token is valid.
