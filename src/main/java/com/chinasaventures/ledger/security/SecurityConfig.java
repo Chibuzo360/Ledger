@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/api/branch/**").permitAll()
                         .anyRequest().authenticated()
+                        //every other endpoint requires to be authenticated, except the end points mentioned
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {

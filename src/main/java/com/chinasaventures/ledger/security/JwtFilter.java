@@ -42,7 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 identifier = jwtUtil.extractIdentifier(token);
             }
 
-            // 2. Process authentication/login if user is present and not already authenticated/logged in(exists in the data base but not logged in)
+            // 2. Process authentication/login if user is present and not already authenticated/logged in(exists in the data base but 'not logged in)
             if (identifier != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(identifier);
 
