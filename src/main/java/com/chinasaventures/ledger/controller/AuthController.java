@@ -43,7 +43,7 @@ public class AuthController {
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
         response.put("role", user.getRole());
-        response.put("name", user.getName());
+       response.put("identifier", user.getName()); // i changed it from name to identifier
 
         return ResponseEntity.ok(response);
     }
