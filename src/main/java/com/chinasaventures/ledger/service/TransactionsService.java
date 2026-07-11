@@ -123,7 +123,14 @@ public class TransactionsService {
             }
         }
 
-        transaction.setPaymentStatus("confirmed");
+        // In TransactionsService.addTransaction() — CHANGED: check if the frontend already marked this confirmed
+        if ("confirmed".equalsIgnoreCase(transaction.getPaymentStatus())) {
+            transaction.setPaymentStatus("confirmed");
+            transaction.setConfirmedBy(currentUser);
+            transaction.setConfirmedAt(LocalDateTime.now());
+        } else {
+            transaction.setPaymentStatus("pending"); // unchanged default
+        }
         transaction.setPaymentProof(paymentProof);
         transaction.setConfirmedAt(LocalDateTime.now());
         transaction.setConfirmedBy(currentUser);
