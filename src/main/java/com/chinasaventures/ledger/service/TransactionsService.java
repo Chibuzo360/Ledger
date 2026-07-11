@@ -107,6 +107,10 @@ public class TransactionsService {
 
         // NEW: only touch amountPaid/paymentType if a new amount was actually sent
         if (amountPaid != null) {
+
+            if (amountPaid.compareTo(transaction.getTotalAmount()) > 0) {
+                throw new RuntimeException("Amount paid cannot exceed total amount owed");
+            }
             transaction.setAmountPaid(amountPaid);
 
             BigDecimal debt = transaction.getTotalAmount().subtract(amountPaid);
