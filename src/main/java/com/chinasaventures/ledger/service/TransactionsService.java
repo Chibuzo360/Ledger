@@ -94,9 +94,7 @@ public class TransactionsService {
         return toDTO(saved); // CHANGED: map before returning
     }
 
-    // CHANGED: return type TransactionResponseDTO instead of Transactions
-    // CHANGED: confirmPayment now takes the new amount + proof, pulls confirmedBy from the JWT
-// (same pattern as addTransaction), and recalculates paymentType if the amount changed
+    // CHANGED: confirmPayment now validates the cap before setting amountPaid
     public TransactionResponseDTO confirmPayment(Long id, BigDecimal amountPaid, String paymentProof) {
         Transactions transaction = getTransactionById(id);
 
@@ -105,11 +103,13 @@ public class TransactionsService {
         Users currentUser = usersRepository.findByEmailOrPhoneNumber(identifier, identifier)
                 .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + identifier));
 
-        // NEW: only touch amountPaid/paymentType if a new amount was actually sent
         if (amountPaid != null) {
-
+            // NEW: guard — can't record more than what's actually owed
             if (amountPaid.compareTo(transaction.getTotalAmount()) > 0) {
-                throw new RuntimeException("Amount paid cannot exceed total amount owed");
+                throw new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.BAD_REQUEST,
+                        "Amount paid cannot exceed total amount owed"
+                );
             }
             transaction.setAmountPaid(amountPaid);
 
@@ -126,13 +126,29 @@ public class TransactionsService {
         transaction.setPaymentStatus("confirmed");
         transaction.setPaymentProof(paymentProof);
         transaction.setConfirmedAt(LocalDateTime.now());
-        transaction.setConfirmedBy(currentUser); // CHANGED: from JWT, not request param
+        transaction.setConfirmedBy(currentUser);
 
         Transactions saved = transactionsRepository.save(transaction);
         return toDTO(saved);
     }
 
+    // CHANGED: deleteTransaction now checks who's deleting and what state the transaction is in
     public void deleteTransaction(Long id){
+        Transactions transaction = getTransactionById(id);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String identifier = auth.getName();
+        Users currentUser = usersRepository.findByEmailOrPhoneNumber(identifier, identifier)
+                .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + identifier));
+
+        // NEW: confirmed transactions can only be deleted by a director
+        if ("confirmed".equals(transaction.getPaymentStatus()) && !"director".equals(currentUser.getRole())) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.FORBIDDEN,
+                    "Only a director can delete a confirmed transaction"
+            );
+        }
+
         transactionsRepository.deleteById(id);
     }
 }
