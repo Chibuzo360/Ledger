@@ -1,10 +1,14 @@
 package com.chinasaventures.ledger.service;
 
 import com.chinasaventures.ledger.model.Expenses;
+import com.chinasaventures.ledger.model.Users;
 import com.chinasaventures.ledger.repository.ExpensesRepository;
-//import com.chinasaventures.ledger.model.Branch;
+import com.chinasaventures.ledger.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 
@@ -12,6 +16,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExpensesService {
     private final ExpensesRepository expensesRepository;
+    private final UsersRepository usersRepository;
+
 
     public List<Expenses> getAllExpenses() {
         return expensesRepository.findAll();
@@ -23,6 +29,16 @@ public class ExpensesService {
     }
 
     public Expenses createExpense(Expenses expense){
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String identifier = auth.getName();
+
+        Users currentUser = usersRepository.findByEmailOrPhoneNumber(identifier, identifier)
+                .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + identifier));
+
+        expense.setRecordedBy(currentUser);
+        expense.setBranch(currentUser.getBranch());
+
         return expensesRepository.save(expense);
     }
 
