@@ -36,6 +36,11 @@ public class RetailersService {
         existing.setBalance(updatedRetailers.getBalance());
         existing.setCreditLimit(updatedRetailers.getCreditLimit());// this might be removed later
         return retailersRepository.save(existing);
+        // if retailers balance is positive and not 0, it means we owe them. if its negative, it means they owe us.
+        //i need to add a "balance details" this describes what the retailer bought/what owe the retailer
+        // we need a new "Product owed" column that will track that, thisd will be in later versions
+        // orderdetails table
+        // The next version(if any), will have a feature that auto-calculates retailers balance from the transactions record
     }
 
     public void deleteRetailer(Long id){
