@@ -41,16 +41,15 @@ public class TransactionsService {
         );
     }
 
-    // CHANGED: return type List<TransactionResponseDTO> instead of List<Transactions>
     public List<TransactionResponseDTO> getAllTransactions() {
-        // CHANGED: swapped findAll() for the ordered version
+        // swapped findAll() for the ordered version (the last created stays up)
         return transactionsRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
                 .map(this::toDTO)
                 .toList();
     }
 
-    // CHANGED: kept this one returning the raw entity — confirmPayment() and addTransaction()
+    // kept this one returning the raw entity — confirmPayment() and addTransaction()
     // still need the real Transactions object internally (e.g. to save it), so this stays
     // as an internal helper. Controller will call toDTO() on the result before responding.
     public Transactions getTransactionById(Long id){
@@ -58,14 +57,14 @@ public class TransactionsService {
                 .orElseThrow(() -> new RuntimeException("Transaction not found with id: "+ id));
     }
 
-    // CHANGED: new method — same lookup as getTransactionById(), but returns the safe DTO
+    // new method — same lookup as getTransactionById(), but returns the safe DTO
     // for controller use. getTransactionById() stays as-is since confirmPayment() needs
     // the raw entity internally to modify and save it.
     public TransactionResponseDTO getTransactionByIdDTO(Long id) {
         return toDTO(getTransactionById(id));
     }
 
-    // CHANGED: return type TransactionResponseDTO instead of Transactions
+    // return type TransactionResponseDTO instead of Transactions
     public TransactionResponseDTO addTransaction(Transactions transaction){
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

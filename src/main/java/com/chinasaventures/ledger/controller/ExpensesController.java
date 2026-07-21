@@ -1,5 +1,6 @@
 package com.chinasaventures.ledger.controller;
 
+import com.chinasaventures.ledger.dto.ExpensesResponseDTO;
 import com.chinasaventures.ledger.model.Expenses;
 import com.chinasaventures.ledger.service.ExpensesService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ public class ExpensesController {
     private final ExpensesService expensesService;
 
     @GetMapping
-    public ResponseEntity<List<Expenses>> getAllExpenses() {
+    public ResponseEntity<List<ExpensesResponseDTO>> getAllExpenses() {
         return ResponseEntity.ok(expensesService.getAllExpenses());
     }
 

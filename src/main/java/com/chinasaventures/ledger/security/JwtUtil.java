@@ -25,7 +25,7 @@ public class JwtUtil {
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
-    }// Omo, this encryption😅
+    }// Omo, this encryption
 
     public String generateToken(String identifier, String role) {
         Map<String, Object> claims = new HashMap<>();

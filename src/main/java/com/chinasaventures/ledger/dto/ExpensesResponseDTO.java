@@ -7,6 +7,7 @@ public record ExpensesResponseDTO(
         Long id,
         String description,
         BigDecimal amount,
-        BranchSummaryDTO recordedBy,
+        UserSummaryDTO recordedBy,
+        BranchSummaryDTO branch,
         LocalDateTime createdAt
 ){}
