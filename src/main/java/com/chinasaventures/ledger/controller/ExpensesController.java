@@ -21,12 +21,12 @@ public class ExpensesController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Expenses> getExpenseById(@PathVariable Long id){
-        return ResponseEntity.ok(expensesService.getExpenseById(id));
+    public ResponseEntity<ExpensesResponseDTO> getExpensesById(@PathVariable Long id){
+        return ResponseEntity.ok(expensesService.getExpensesById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Expenses> createExpense(@RequestBody Expenses expense){
+    public ResponseEntity<ExpensesResponseDTO> createExpense(@RequestBody Expenses expense){
         return ResponseEntity.ok(expensesService.createExpense(expense));
     }
 

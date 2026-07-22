@@ -56,7 +56,7 @@ public class ExpensesService {
     public ExpensesResponseDTO getExpensesById(Long id){return toDTO(getExpenseById(id));}
 
     // Will change this to return ExpensesDTO and remove the return once im ready to change the controller.
-    public Expenses createExpense(Expenses expense){
+    public ExpensesResponseDTO createExpense(Expenses expense){
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String identifier = auth.getName();
@@ -67,17 +67,16 @@ public class ExpensesService {
         expense.setRecordedBy(currentUser);
         expense.setBranch(currentUser.getBranch());
 
-//        Expenses savedExpense =  expensesRepository.save(expense);
-//        // This ensures it is updated before returning
-//        return toDTO(savedExpense);
-        return expensesRepository.save(expense);
+        Expenses savedExpense =  expensesRepository.save(expense);
+        // This ensures it is updated before returning
+        return toDTO(savedExpense);
     }
 
     public Expenses updateExpenses(Long id, Expenses updatedExpenses){
         Expenses existing = getExpenseById(id);
         existing.setDescription(updatedExpenses.getDescription());
         existing.setAmount(updatedExpenses.getAmount());
-        existing.setBranch(updatedExpenses.getBranch());
+//        existing.setBranch(updatedExpenses.getBranch());
         return expensesRepository.save(existing);
     }
 
