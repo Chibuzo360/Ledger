@@ -50,9 +50,9 @@ public class Transactions {
     @JoinColumn(name = "branch_id", nullable = false)
     private Branch branch;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "retailer_id", nullable = false)
-//    private Retailers retailer;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "retailer_id", nullable = false)
+    private Retailers retailer;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

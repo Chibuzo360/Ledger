@@ -1,5 +1,6 @@
 package com.chinasaventures.ledger.service;
 
+import com.chinasaventures.ledger.dto.RetailerSummaryDTO;
 import com.chinasaventures.ledger.dto.TransactionResponseDTO;
 import com.chinasaventures.ledger.dto.UserSummaryDTO;
 import com.chinasaventures.ledger.model.Transactions;
@@ -32,12 +33,15 @@ public class TransactionsService {
         UserSummaryDTO confirmedBy = t.getConfirmedBy() != null
                 ? new UserSummaryDTO(t.getConfirmedBy().getId(), t.getConfirmedBy().getName(), t.getConfirmedBy().getRole())
                 : null;
+        RetailerSummaryDTO retailer = t.getRetailer() != null
+                ? new RetailerSummaryDTO(t.getRetailer().getId(), t.getRetailer().getBusinessName())
+                : null;
 
         return new TransactionResponseDTO(
                 t.getId(), t.getCustomerName(), t.getCustomerPhone(),
                 t.getTotalAmount(), t.getAmountPaid(), t.getPaymentStatus(),
                 t.getPaymentType(), t.getPaymentProof(),
-                recordedBy, confirmedBy, t.getConfirmedAt(), t.getCreatedAt()
+                recordedBy, confirmedBy,retailer , t.getConfirmedAt(), t.getCreatedAt()
         );
     }
 

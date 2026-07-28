@@ -15,6 +15,7 @@ public record TransactionResponseDTO(
         String paymentProof,
         UserSummaryDTO recordedBy,
         UserSummaryDTO confirmedBy,
+        RetailerSummaryDTO retailer, // NEW
         LocalDateTime confirmedAt,
         LocalDateTime createdAt
 ) {}

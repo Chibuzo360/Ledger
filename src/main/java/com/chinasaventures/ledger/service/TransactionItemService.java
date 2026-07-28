@@ -30,6 +30,10 @@ public class TransactionItemService {
                 .orElseThrow(() -> new RuntimeException("Item not found with id: " + id));
     }
 
+    public List<TransactionItem> getItemsByRetailerId(Long retailerId){
+        return transactionItemRepository.findByTransaction_Retailer_Id(retailerId);
+    }
+
     public TransactionItem addTransactionItem(TransactionItem transactionItem){
         TransactionItem saved = transactionItemRepository.save(transactionItem);
 

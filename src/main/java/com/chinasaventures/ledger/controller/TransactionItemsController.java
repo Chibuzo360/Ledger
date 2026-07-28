@@ -33,6 +33,11 @@ public class TransactionItemsController {
         return ResponseEntity.ok(transactionItemService.getTransactionItemById(id));
     }
 
+    @GetMapping("/retailer/{retailerId}")
+    public ResponseEntity<List<TransactionItem>> getItemsByRetailerId(@PathVariable Long retailerId){
+        return ResponseEntity.ok(transactionItemService.getItemsByRetailerId(retailerId));
+    }
+
     @PostMapping
     public ResponseEntity<TransactionItem> addTransactionItem(@RequestBody TransactionItem transactionItem) {
         return ResponseEntity.ok(transactionItemService.addTransactionItem(transactionItem));
