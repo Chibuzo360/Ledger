@@ -31,7 +31,7 @@ public class ExpensesController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Expenses> updateExpenses(@PathVariable Long id, @RequestBody Expenses updatedExpenses){
+    public ResponseEntity<ExpensesResponseDTO> updateExpenses(@PathVariable Long id, @RequestBody Expenses updatedExpenses){
         return ResponseEntity.ok(expensesService.updateExpenses(id, updatedExpenses));
     }
 
