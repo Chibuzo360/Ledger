@@ -1,10 +1,11 @@
 package com.chinasaventures.ledger.service;
 
+import com.chinasaventures.ledger.dto.*;
 import com.chinasaventures.ledger.model.ProductVariants;
 import com.chinasaventures.ledger.repository.ProductVariantsRepository;
 import com.chinasaventures.ledger.repository.TransactionItemRepository;
 import com.chinasaventures.ledger.model.TransactionItem;
-import com.chinasaventures.ledger.model.Product;
+import com.chinasaventures.ledger.model.ProductCategory;
 import com.chinasaventures.ledger.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,61 @@ import java.util.List;
 public class TransactionItemService {
     private final TransactionItemRepository transactionItemRepository;
     private final ProductVariantsRepository productVariantsRepository;
+
+    private  ProductCategory pCategory(TransactionItem item){
+        //The if block  handles potential NullPointerException risks
+        if (item !=null &&
+                item.getProductVariant() !=null &&
+                item.getProductVariant().getProduct() !=null &&
+                item.getProductVariant().getProduct().getCategory() !=null) {
+            return item.getProductVariant().getProduct().getCategory();
+        }
+        return null;
+    }
+
+    private TransactionItemResponseDTO toDTO (TransactionItem txnItem){
+        RetailerSummaryDTO retailer = txnItem.getTransaction().getRetailer() !=null
+                ? new RetailerSummaryDTO(
+                        txnItem.getTransaction().getRetailer().getId(),
+                txnItem.getTransaction().getRetailer().getBusinessName(),
+                txnItem.getTransaction().getRetailer().getContactName()
+        ):null;
+
+        ProductCategoryDTO productCategory = pCategory(txnItem) !=null // used the pCategory method to make thing look good
+                ? new ProductCategoryDTO(
+                txnItem.getProductVariant().getProduct().getCategory().getId(),
+                txnItem.getProductVariant().getProduct().getCategory().getName()
+        ):null;
+
+        ProductSummaryDTO product = txnItem.getProduct() !=null
+                ? new ProductSummaryDTO(
+                txnItem.getProduct().getId(),
+                txnItem.getProduct().getName(),
+                productCategory,
+                txnItem.getProduct().getCurrentStock()
+        ): null;
+
+        ProductVariantSummaryDTO productVariant = txnItem.getProductVariant() !=null
+                ?new ProductVariantSummaryDTO(
+                        txnItem.getProductVariant().getId(),
+                product,
+                txnItem.getProductVariant().getSize(),
+                txnItem.getProductVariant().getProducer(),
+                txnItem.getProductVariant().getCurrentStock()
+        ):null;
+
+        TransactionSummaryDTO transaction = txnItem.getTransaction() !=null
+                ? new TransactionSummaryDTO(
+                        txnItem.getTransaction().getId(),
+                txnItem.getTransaction().getCustomerName(),
+                txnItem.getTransaction().getTotalAmount(),
+                txnItem.getTransaction().getAmountPaid(),
+                retailer)
+                :null;
+
+
+
+    }
 
     public List<TransactionItem> getAllTransactionItems(){
         return transactionItemRepository.findAll();

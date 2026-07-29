@@ -52,7 +52,7 @@ public class Transactions {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "retailer_id", nullable = false)
-    private Retailers retailer;
+    private Retailers retailer; // probably added this newly. modify the service and controller if need be
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

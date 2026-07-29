@@ -34,7 +34,7 @@ public class TransactionsService {
                 ? new UserSummaryDTO(t.getConfirmedBy().getId(), t.getConfirmedBy().getName(), t.getConfirmedBy().getRole())
                 : null;
         RetailerSummaryDTO retailer = t.getRetailer() != null
-                ? new RetailerSummaryDTO(t.getRetailer().getId(), t.getRetailer().getBusinessName())
+                ? new RetailerSummaryDTO(t.getRetailer().getId(), t.getRetailer().getBusinessName(), t.getCustomerName())//updated this to also return customer name
                 : null;
 
         return new TransactionResponseDTO(

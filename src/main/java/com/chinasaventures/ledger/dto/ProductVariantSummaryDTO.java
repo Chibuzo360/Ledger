@@ -1,6 +1,6 @@
 package com.chinasaventures.ledger.dto;
 
-public record ProductVariantSummmaryDTO(
+public record ProductVariantSummaryDTO(
         Long id,
         ProductSummaryDTO product,
         String size,

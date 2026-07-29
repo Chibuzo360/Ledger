@@ -1,11 +1,9 @@
 package com.chinasaventures.ledger.dto;
 
-import com.chinasaventures.ledger.model.ProductVariants;
-
-public record TransactionItemReponseDTO(
+public record TransactionItemResponseDTO(
         Long id,
         TransactionSummaryDTO transaction,
-        ProductSummaryDTO product,
+        ProductSummaryDTO product, //added newly
         ProductVariantSummmaryDTO productVariant,
         int quantityOrdered,
         int quantitySupplied,
