@@ -75,7 +75,6 @@ public class ExpensesService {
         Expenses existing = getExpenseById(id);
         existing.setDescription(updatedExpenses.getDescription());
         existing.setAmount(updatedExpenses.getAmount());
-//        existing.setBranch(updatedExpenses.getBranch());
         Expenses updatedExpense = expensesRepository.save(existing);
         return toDTO(updatedExpense);
     }

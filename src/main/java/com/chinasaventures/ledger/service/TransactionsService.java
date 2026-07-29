@@ -61,7 +61,7 @@ public class TransactionsService {
                 .orElseThrow(() -> new RuntimeException("Transaction not found with id: "+ id));
     }
 
-    // new method — same lookup as getTransactionById(), but returns the safe DTO
+    // lookup as getTransactionById(), but returns the DTO
     // for controller use. getTransactionById() stays as-is since confirmPayment() needs
     // the raw entity internally to modify and save it.
     public TransactionResponseDTO getTransactionByIdDTO(Long id) {

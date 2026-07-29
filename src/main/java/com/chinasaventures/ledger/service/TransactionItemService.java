@@ -29,11 +29,11 @@ public class TransactionItemService {
     }
 
     private TransactionItemResponseDTO toDTO (TransactionItem txnItem){
-        RetailerSummaryDTO retailer = txnItem.getTransaction().getRetailer() !=null
+        RetailerSummaryDTO retailer = txnItem.getRetailer() !=null
                 ? new RetailerSummaryDTO(
-                        txnItem.getTransaction().getRetailer().getId(),
-                txnItem.getTransaction().getRetailer().getBusinessName(),
-                txnItem.getTransaction().getRetailer().getContactName()
+                        txnItem.getRetailer().getId(),
+                txnItem.getRetailer().getBusinessName(),
+                txnItem.getRetailer().getContactName()
         ):null;
 
         ProductCategoryDTO productCategory = pCategory(txnItem) !=null // used the pCategory method to make thing look good
@@ -75,12 +75,19 @@ public class TransactionItemService {
         );
     }
 
-    public List<TransactionItem> getAllTransactionItems(){
-        return transactionItemRepository.findAll();
+    public List<TransactionItemResponseDTO> getAllTransactionItems(){
+        return transactionItemRepository.findAll()
+                .stream()
+                .map(this::toDTO)
+                .toList();
     }
 
-    public List<TransactionItem> getItemsByTransactionId(Long transactionId){
-        return transactionItemRepository.findByTransactionId(transactionId);
+
+    public List<TransactionItemResponseDTO> getItemsByTransactionId(Long transactionId){
+        return transactionItemRepository.findByTransactionId(transactionId)
+                .stream()
+                .map(this::toDTO)
+                .toList();
     }
 
     public TransactionItem getTransactionItemById(Long id){
@@ -88,17 +95,22 @@ public class TransactionItemService {
                 .orElseThrow(() -> new RuntimeException("Item not found with id: " + id));
     }
 
-    public List<TransactionItem> getItemsByRetailerId(Long retailerId){
-        return transactionItemRepository.findByTransaction_Retailer_Id(retailerId);
+    public TransactionItemResponseDTO getTransactionItemByIdDTO(Long id){return toDTO(getTransactionItemById(id));}
+
+    public List<TransactionItemResponseDTO> getItemsByRetailerId(Long retailerId){
+        return transactionItemRepository.findByTransaction_Retailer_Id(retailerId)
+                .stream()
+                .map(this::toDTO)
+                .toList();
     }
 
-    public TransactionItem addTransactionItem(TransactionItem transactionItem){
+    public TransactionItemResponseDTO addTransactionItem(TransactionItem transactionItem){
         TransactionItem saved = transactionItemRepository.save(transactionItem);
 
         ProductVariants product = saved.getProductVariant();
         product.setCurrentStock(product.getCurrentStock() - saved.getQuantitySupplied());
         productVariantsRepository.save(product);
-        return saved;
+        return toDTO(saved);
     }
 
     public void deleteTransactionItem(Long id){
