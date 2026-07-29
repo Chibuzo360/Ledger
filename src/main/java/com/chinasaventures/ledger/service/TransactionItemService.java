@@ -21,10 +21,9 @@ public class TransactionItemService {
     private  ProductCategory pCategory(TransactionItem item){
         //The if block  handles potential NullPointerException risks
         if (item !=null &&
-                item.getProductVariant() !=null &&
-                item.getProductVariant().getProduct() !=null &&
-                item.getProductVariant().getProduct().getCategory() !=null) {
-            return item.getProductVariant().getProduct().getCategory();
+                item.getProduct() !=null &&
+                item.getProduct().getCategory() !=null) {
+            return item.getProduct().getCategory();
         }
         return null;
     }
@@ -39,9 +38,18 @@ public class TransactionItemService {
 
         ProductCategoryDTO productCategory = pCategory(txnItem) !=null // used the pCategory method to make thing look good
                 ? new ProductCategoryDTO(
-                txnItem.getProductVariant().getProduct().getCategory().getId(),
-                txnItem.getProductVariant().getProduct().getCategory().getName()
+                pCategory(txnItem).getId(),
+                pCategory(txnItem).getName()
         ):null;
+
+        TransactionSummaryDTO transaction = txnItem.getTransaction() !=null
+                ? new TransactionSummaryDTO(
+                txnItem.getTransaction().getId(),
+                txnItem.getTransaction().getCustomerName(),
+                txnItem.getTransaction().getTotalAmount(),
+                txnItem.getTransaction().getAmountPaid(),
+                retailer)
+                :null;
 
         ProductSummaryDTO product = txnItem.getProduct() !=null
                 ? new ProductSummaryDTO(
@@ -60,17 +68,11 @@ public class TransactionItemService {
                 txnItem.getProductVariant().getCurrentStock()
         ):null;
 
-        TransactionSummaryDTO transaction = txnItem.getTransaction() !=null
-                ? new TransactionSummaryDTO(
-                        txnItem.getTransaction().getId(),
-                txnItem.getTransaction().getCustomerName(),
-                txnItem.getTransaction().getTotalAmount(),
-                txnItem.getTransaction().getAmountPaid(),
-                retailer)
-                :null;
-
-
-
+        return new TransactionItemResponseDTO(
+                txnItem.getId(), transaction, product, productVariant,
+                txnItem.getQuantityOrdered(), txnItem.getQuantitySupplied(),
+                txnItem.getSupplyStatus()
+        );
     }
 
     public List<TransactionItem> getAllTransactionItems(){
