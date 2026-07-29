@@ -1,6 +1,7 @@
 package com.chinasaventures.ledger.controller;
 
 
+import com.chinasaventures.ledger.dto.TransactionItemResponseDTO;
 import com.chinasaventures.ledger.model.TransactionItem;
 //import com.chinasaventures.ledger.service.ProductService;
 import com.chinasaventures.ledger.service.TransactionItemService;
@@ -19,27 +20,27 @@ public class TransactionItemsController {
     private final TransactionItemService transactionItemService;
 
     @GetMapping
-    public ResponseEntity<List<TransactionItem>> getAllTransactions(){
+    public ResponseEntity<List<TransactionItemResponseDTO>> getAllTransactions(){
         return ResponseEntity.ok(transactionItemService.getAllTransactionItems());
     }
 
     @GetMapping("/transaction/{transactionId}")
-    public ResponseEntity<List<TransactionItem>> getItemsByTransactionId(@PathVariable Long transactionId){
+    public ResponseEntity<List<TransactionItemResponseDTO>> getItemsByTransactionId(@PathVariable Long transactionId){
         return ResponseEntity.ok(transactionItemService.getItemsByTransactionId(transactionId));
     }// I fixed the problem, it was from the "getItemsBy..." in the Response entity.ok
 
     @GetMapping("/{id}")
-    public ResponseEntity<TransactionItem> getTransactionItemsById(@PathVariable Long id){
-        return ResponseEntity.ok(transactionItemService.getTransactionItemById(id));
+    public ResponseEntity<TransactionItemResponseDTO> getTransactionItemsById(@PathVariable Long id){
+        return ResponseEntity.ok(transactionItemService.getTransactionItemByIdDTO(id));
     }
 
     @GetMapping("/retailer/{retailerId}")
-    public ResponseEntity<List<TransactionItem>> getItemsByRetailerId(@PathVariable Long retailerId){
+    public ResponseEntity<List<TransactionItemResponseDTO>> getItemsByRetailerId(@PathVariable Long retailerId){
         return ResponseEntity.ok(transactionItemService.getItemsByRetailerId(retailerId));
     }
 
     @PostMapping
-    public ResponseEntity<TransactionItem> addTransactionItem(@RequestBody TransactionItem transactionItem) {
+    public ResponseEntity<TransactionItemResponseDTO> addTransactionItem(@RequestBody TransactionItem transactionItem) {
         return ResponseEntity.ok(transactionItemService.addTransactionItem(transactionItem));
     }
 
