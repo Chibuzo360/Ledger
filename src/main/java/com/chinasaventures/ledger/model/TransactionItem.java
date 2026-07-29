@@ -18,6 +18,10 @@ public class TransactionItem {
     private Transactions transaction;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product; // i added this newly " wort checking if it affects services and controllers
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_variant_id")
     private ProductVariants productVariant;
 
