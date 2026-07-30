@@ -6,6 +6,7 @@ import com.chinasaventures.ledger.repository.ProductVariantsRepository;
 import com.chinasaventures.ledger.repository.TransactionItemRepository;
 import com.chinasaventures.ledger.model.TransactionItem;
 import com.chinasaventures.ledger.model.ProductCategory;
+import com.chinasaventures.ledger.model.Product;
 import com.chinasaventures.ledger.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.List;
 public class TransactionItemService {
     private final TransactionItemRepository transactionItemRepository;
     private final ProductVariantsRepository productVariantsRepository;
+    private final ProductRepository productRepository;
 
     private  ProductCategory pCategory(TransactionItem item){
         //The if block  handles potential NullPointerException risks
@@ -107,10 +109,22 @@ public class TransactionItemService {
     public TransactionItemResponseDTO addTransactionItem(TransactionItem transactionItem){
         TransactionItem saved = transactionItemRepository.save(transactionItem);
 
-        ProductVariants product = saved.getProductVariant();
-        product.setCurrentStock(product.getCurrentStock() - saved.getQuantitySupplied());
-        productVariantsRepository.save(product);
-        return toDTO(saved);
+        // I added  conditionals in case the product had no variant for example Binding wire.
+        if(transactionItem.getProductVariant() !=null)
+        {
+            ProductVariants product = saved.getProductVariant();
+            product.setCurrentStock(product.getCurrentStock() - saved.getQuantitySupplied());
+            productVariantsRepository.save(product);
+            return toDTO(saved);
+        }else if(transactionItem.getProduct() !=null){
+            Product justProduct = saved.getProduct();
+            justProduct.setCurrentStock(justProduct.getCurrentStock() - saved.getQuantitySupplied());
+            productRepository.save(justProduct);
+            return toDTO(saved);
+        }else {
+            throw new RuntimeException("For some reason this Item has no product Reference");
+        }
+
     }
 
     public void deleteTransactionItem(Long id){
