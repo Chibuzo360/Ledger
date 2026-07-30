@@ -29,11 +29,11 @@ public class TransactionItemService {
     }
 
     private TransactionItemResponseDTO toDTO (TransactionItem txnItem){
-        RetailerSummaryDTO retailer = txnItem.getRetailer() !=null
+        RetailerSummaryDTO retailer = txnItem.getTransaction().getRetailer() !=null
                 ? new RetailerSummaryDTO(
-                        txnItem.getRetailer().getId(),
-                txnItem.getRetailer().getBusinessName(),
-                txnItem.getRetailer().getContactName()
+                        txnItem.getTransaction().getRetailer().getId(),
+                txnItem.getTransaction().getRetailer().getBusinessName(),
+                txnItem.getTransaction().getRetailer().getContactName()
         ):null;
 
         ProductCategoryDTO productCategory = pCategory(txnItem) !=null // used the pCategory method to make thing look good

@@ -25,9 +25,6 @@ public class TransactionItem {
     @JoinColumn(name = "product_variant_id")
     private ProductVariants productVariant;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "retailer_id")
-    private Retailers retailer; // added this newly to enable fetching if a retailer bought a good
 
     @Column(name = "quantity_ordered", nullable = false)
     private Integer quantityOrdered;

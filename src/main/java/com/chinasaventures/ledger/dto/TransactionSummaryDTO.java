@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public record TransactionSummaryDTO(
         Long id,
-        String CustomerName,
+        String customerName,
         BigDecimal totalAmount,
         BigDecimal amountPaid,
         RetailerSummaryDTO retailer
