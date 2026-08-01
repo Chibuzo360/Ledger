@@ -110,16 +110,16 @@ public class TransactionItemService {
         TransactionItem saved = transactionItemRepository.save(transactionItem);
 
         // I added  conditionals in case the product had no variant for example Binding wire.
-        if(transactionItem.getProductVariant() !=null)
+        if(saved.getProductVariant() !=null)
         {
-            ProductVariants product = saved.getProductVariant();
-            product.setCurrentStock(product.getCurrentStock() - saved.getQuantitySupplied());
-            productVariantsRepository.save(product);
+            ProductVariants productVariant = saved.getProductVariant();
+            productVariant.setCurrentStock(productVariant.getCurrentStock() - saved.getQuantitySupplied());
+            productVariantsRepository.save(productVariant);
             return toDTO(saved);
-        }else if(transactionItem.getProduct() !=null){
-            Product justProduct = saved.getProduct();
-            justProduct.setCurrentStock(justProduct.getCurrentStock() - saved.getQuantitySupplied());
-            productRepository.save(justProduct);
+        }else if(saved.getProduct() !=null){
+            Product product = saved.getProduct();
+            product.setCurrentStock(product.getCurrentStock() - saved.getQuantitySupplied());
+            productRepository.save(product);
             return toDTO(saved);
         }else {
             throw new RuntimeException("For some reason this Item has no product Reference");

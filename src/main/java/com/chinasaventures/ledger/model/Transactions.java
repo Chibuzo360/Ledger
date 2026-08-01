@@ -51,7 +51,7 @@ public class Transactions {
     private Branch branch;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "retailer_id", nullable = false)
+    @JoinColumn(name = "retailer_id")
     private Retailers retailer; // probably added this newly. modify the service and controller if need be
 
     @Column(name = "created_at")
