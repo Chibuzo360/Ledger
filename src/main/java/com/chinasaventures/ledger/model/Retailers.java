@@ -44,5 +44,5 @@ public class Retailers {
 
     // we could add the total amount the customer has spent in the business
     // we could also add the last payment date and the last payment amount.
-    //
+
 }

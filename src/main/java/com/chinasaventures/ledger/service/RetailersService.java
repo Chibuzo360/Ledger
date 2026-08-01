@@ -45,17 +45,26 @@ public class RetailersService {
     }
 
     public Retailers updateRetailers(Long id, Retailers updatedRetailers){
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String identifier = auth.getName();
+
+        Users currentUser = usersRepository.findByEmailOrPhoneNumber(identifier, identifier)
+                .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + identifier));
+
         Retailers existing = getRetailerById(id);
         existing.setBusinessName(updatedRetailers.getBusinessName());
         existing.setContactName(updatedRetailers.getContactName());
         existing.setPhone(updatedRetailers.getPhone());
         existing.setBalance(updatedRetailers.getBalance());
+        existing.setBranch(currentUser.getBranch());
         existing.setCreditLimit(updatedRetailers.getCreditLimit());// this might be removed later
         return retailersRepository.save(existing);
         // if retailers balance is positive and not 0, it means we owe them. if its negative, it means they owe us.
         //i need to add a "balance details" this describes what the retailer bought/what owe the retailer
         // The product owed column will be a source of extra detail in this version.
         // The next version(if any), will have a feature that auto-calculates retailers balance from the transactions record
+        //Retailers Branch should be edited as it tells us where the retailer bought from in the last transaction
     }
 
     public void deleteRetailer(Long id){
