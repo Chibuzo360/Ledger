@@ -68,6 +68,19 @@ public class RetailersService {
     }
 
     public void deleteRetailer(Long id){
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String identifier = auth.getName();
+
+        Users currentUser = usersRepository.findByEmailOrPhoneNumber(identifier, identifier)
+                .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + identifier));
+
+        if(!"director".equals(currentUser.getRole())){
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.FORBIDDEN,
+                    "Only a director can delete a Retailer's account"
+            );
+        }
         retailersRepository.deleteById(id);
     }
 }
