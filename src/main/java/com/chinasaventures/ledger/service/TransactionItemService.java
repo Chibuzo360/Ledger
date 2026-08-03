@@ -57,6 +57,7 @@ public class TransactionItemService {
                 ? new ProductSummaryDTO(
                 txnItem.getProduct().getId(),
                 txnItem.getProduct().getName(),
+                txnItem.getProduct().getPricePerUnit(),
                 productCategory,
                 txnItem.getProduct().getCurrentStock()
         ): null;
@@ -65,6 +66,7 @@ public class TransactionItemService {
                 ?new ProductVariantSummaryDTO(
                         txnItem.getProductVariant().getId(),
                 product,
+                txnItem.getProductVariant().getPricePerUnit(),
                 txnItem.getProductVariant().getSize(),
                 txnItem.getProductVariant().getProducer(),
                 txnItem.getProductVariant().getCurrentStock()

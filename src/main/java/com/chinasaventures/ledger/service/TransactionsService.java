@@ -140,6 +140,9 @@ public class TransactionsService {
 
         Transactions saved = transactionsRepository.save(transaction);
         return toDTO(saved);
+        // in the next version, updating a transaction will involve finding the first instance of that transaction,
+        // and the branching it, creating a new transaction that is connected to the former one
+        // that way, youll be able to see the time when the txn is updated every single time
     }
 
     // CHANGED: deleteTransaction now checks who's deleting and what state the transaction is in

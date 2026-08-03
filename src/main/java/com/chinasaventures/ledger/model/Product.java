@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 
@@ -22,8 +23,8 @@ public class Product {
     @Column(nullable = false)
     private String unit;
 
-//    @Column(nullable = false)
-//    private BigDecimal pricePerUnit = BigDecimal.ZERO;
+    @Column(name = "price_per_unit")
+    private BigDecimal pricePerUnit = BigDecimal.ZERO;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
