@@ -2,6 +2,8 @@ package com.chinasaventures.ledger.service;
 
 import com.chinasaventures.ledger.model.Product;
 import com.chinasaventures.ledger.repository.ProductRepository;
+import com.chinasaventures.ledger.dto.ProductSummaryDTO;
+import com.chinasaventures.ledger.dto.ProductCategoryDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,8 +14,21 @@ import java.util.List;
 public class ProductService {
     private final ProductRepository productRepository;
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public ProductSummaryDTO toDTO (Product p){
+        ProductCategoryDTO productCategory = p.getCategory() != null
+                ? new ProductCategoryDTO(p.getCategory().getId(),p.getCategory().getName())
+                : null ;
+        return new ProductSummaryDTO(
+                p.getId(), p.getName(),p.getPricePerUnit(),productCategory,
+                p.getCurrentStock()
+        );
+    }
+
+    public List<ProductSummaryDTO> getAllProducts() {
+        return productRepository.findAll()
+                .stream()
+                .map(this::toDTO)
+                .toList();
     }
 
     public Product getProductById(Long id){
@@ -21,16 +36,21 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found with id: "+ id));
     }
 
-    public Product createProduct(Product product){
-        return productRepository.save(product);
+    public ProductSummaryDTO getProductDTOById(Long id){return toDTO(getProductById(id));}
+
+    public ProductSummaryDTO createProduct(Product product){
+        // will consider adding a "recordedBy" column to its entity
+        Product savedProduct = productRepository.save(product);
+        return  toDTO(savedProduct);
     }
 
-    public Product updateProduct(Long id, Product updatedProduct){
+    public ProductSummaryDTO updateProduct(Long id, Product updatedProduct){
         Product existing = getProductById(id);
         existing.setName(updatedProduct.getName());
         existing.setUnit(updatedProduct.getUnit());
         existing.setCurrentStock(updatedProduct.getCurrentStock());
-        return productRepository.save(existing);
+        Product upToDateProduct = productRepository.save(existing);
+        return toDTO(upToDateProduct);
     }
 
     public void deleteProduct(Long id){

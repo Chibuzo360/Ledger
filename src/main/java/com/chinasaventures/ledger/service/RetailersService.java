@@ -57,14 +57,13 @@ public class RetailersService {
         existing.setContactName(updatedRetailers.getContactName());
         existing.setPhone(updatedRetailers.getPhone());
         existing.setBalance(updatedRetailers.getBalance());
-        existing.setBranch(currentUser.getBranch());
         existing.setCreditLimit(updatedRetailers.getCreditLimit());// this might be removed later
         return retailersRepository.save(existing);
         // if retailers balance is positive and not 0, it means we owe them. if its negative, it means they owe us.
         //i need to add a "balance details" this describes what the retailer bought/what owe the retailer
         // The product owed column will be a source of extra detail in this version.
         // The next version(if any), will have a feature that auto-calculates retailers balance from the transactions record
-        //Retailers Branch should be edited as it tells us where the retailer bought from in the last transaction
+        //Retailers Branch now tells us the home branch of the retailer. this maybe later utilized for some restrictive activities.
     }
 
     public void deleteRetailer(Long id){
