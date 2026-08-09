@@ -47,6 +47,8 @@ public class ProductService {
     public ProductSummaryDTO updateProduct(Long id, Product updatedProduct){
         Product existing = getProductById(id);
         existing.setName(updatedProduct.getName());
+        existing.setPricePerUnit(updatedProduct.getPricePerUnit());
+        existing.setCategory(updatedProduct.getCategory());
         existing.setUnit(updatedProduct.getUnit());
         existing.setCurrentStock(updatedProduct.getCurrentStock());
         Product upToDateProduct = productRepository.save(existing);

@@ -1,5 +1,6 @@
 package com.chinasaventures.ledger.controller;
 
+import com.chinasaventures.ledger.dto.ProductVariantSummaryDTO;
 import com.chinasaventures.ledger.model.ProductVariants;
 import com.chinasaventures.ledger.service.ProductVariantsService;
 import lombok.RequiredArgsConstructor;
@@ -16,27 +17,27 @@ public class ProductVariantsController {
     private final ProductVariantsService productVariantsService;
 
     @GetMapping
-    public ResponseEntity<List<ProductVariants>> getAllProductVariants() {
+    public ResponseEntity<List<ProductVariantSummaryDTO>> getAllProductVariants() {
         return ResponseEntity.ok(productVariantsService.getAllProductVariants());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductVariants> getProductVariantById(@PathVariable Long id) {
-        return ResponseEntity.ok(productVariantsService.getProductVariantsById(id));
+    public ResponseEntity<ProductVariantSummaryDTO> getProductVariantById(@PathVariable Long id) {
+        return ResponseEntity.ok(productVariantsService.getProductVariantsDTOById(id));
     }
 
     @GetMapping("/product/{productId}")
-    public ResponseEntity<List<ProductVariants>> getVariantsByProductId(@PathVariable Long productId) {
+    public ResponseEntity<List<ProductVariantSummaryDTO>> getVariantsByProductId(@PathVariable Long productId) {
         return ResponseEntity.ok(productVariantsService.getVariantsByProductId(productId));
     }
 
     @PostMapping
-    public ResponseEntity<ProductVariants> createProductVariant(@RequestBody ProductVariants productVariant) {
+    public ResponseEntity<ProductVariantSummaryDTO> createProductVariant(@RequestBody ProductVariants productVariant) {
         return ResponseEntity.ok(productVariantsService.createProductVariant(productVariant));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductVariants> updateProductVariant(@PathVariable Long id,
+    public ResponseEntity<ProductVariantSummaryDTO> updateProductVariant(@PathVariable Long id,
                                                                 @RequestBody ProductVariants productVariant) {
         return ResponseEntity.ok(productVariantsService.updateProductVariant(id, productVariant));
     }
