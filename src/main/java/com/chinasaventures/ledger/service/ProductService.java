@@ -1,10 +1,16 @@
 package com.chinasaventures.ledger.service;
 
 import com.chinasaventures.ledger.model.Product;
+import com.chinasaventures.ledger.model.Users;
 import com.chinasaventures.ledger.repository.ProductRepository;
+import com.chinasaventures.ledger.repository.UsersRepository;
+import com.chinasaventures.ledger.repository.ProductVariantsRepository;
 import com.chinasaventures.ledger.dto.ProductSummaryDTO;
 import com.chinasaventures.ledger.dto.ProductCategoryDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +19,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+    private final UsersRepository usersRepository;
+    private final ProductVariantsRepository productVariantsRepository;
 
     public ProductSummaryDTO toDTO (Product p){
         ProductCategoryDTO productCategory = p.getCategory() != null
@@ -56,6 +64,28 @@ public class ProductService {
     }
 
     public void deleteProduct(Long id){
-        productRepository.deleteById(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String identifier = auth.getName();
+
+        Users currentUser = usersRepository.findByEmailOrPhoneNumber(identifier, identifier)
+                .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + identifier));
+        //  look up the Users via usersRepository.findByEmailOrPhoneNumber(...)
+        // if currentUser's role isn't "director", throw
+        //         ResponseStatusException(HttpStatus.FORBIDDEN, "...")
+
+        if(!"director".equals(currentUser.getRole())){
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.FORBIDDEN,
+                    "Only a director can delete a Product");
+        }
+
+        boolean isPresent = productVariantsRepository.existsByProductId(id);
+        if(!isPresent) {
+            productRepository.deleteById(id);
+        }else{
+            throw new org.springframework.web.server.ResponseStatusException(
+                    HttpStatus.CONFLICT,"You are not allowed to delete a product with active Variants."
+            );
+        }
     }
 }

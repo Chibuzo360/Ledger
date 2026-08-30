@@ -30,8 +30,8 @@ public class ProductVariantsService {
     public ProductVariantSummaryDTO toDTO(ProductVariants pV){
         ProductCategoryDTO productCategory = safeCategoryReturner(pV) != null
                 ? new ProductCategoryDTO(
-                        pV.getProduct().getCategory().getId(),
-                pV.getProduct().getCategory().getName())
+                safeCategoryReturner(pV).getId(),
+                safeCategoryReturner(pV).getName())
                 : null;
         ProductSummaryDTO product = pV.getProduct() != null
                 ? new ProductSummaryDTO(
