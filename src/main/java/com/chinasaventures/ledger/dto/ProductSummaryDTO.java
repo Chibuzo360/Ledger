@@ -6,6 +6,6 @@ public record ProductSummaryDTO (
         Long id,
         String name,
         BigDecimal pricePerUnit,
-        ProductCategoryDTO productCategory,
+        ProductCategoryDTO category,
         int currentStock
 ){}

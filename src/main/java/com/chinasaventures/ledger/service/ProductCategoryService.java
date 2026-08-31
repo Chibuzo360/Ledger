@@ -1,8 +1,13 @@
 package com.chinasaventures.ledger.service;
 
 import com.chinasaventures.ledger.model.ProductCategory;
+import com.chinasaventures.ledger.model.Users;
 import com.chinasaventures.ledger.repository.ProductCategoryRepository;
+import com.chinasaventures.ledger.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,6 +17,7 @@ import java.util.List;
 public class ProductCategoryService {
 
     private final ProductCategoryRepository productCategoryRepository;
+    private final UsersRepository usersRepository;
 
     public List<ProductCategory> getAllCategories() {
         return productCategoryRepository.findAll();
@@ -33,6 +39,18 @@ public class ProductCategoryService {
     }
 
     public void deleteProductCategory(Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String identifier = auth.getName();
+
+        Users currentUser = usersRepository.findByEmailOrPhoneNumber(identifier,identifier)
+                        .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + identifier));
+
+        if(!"director".equals(currentUser.getRole())){
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.FORBIDDEN,
+                    "Only a director can delete a Product Category.");
+        }
+
         productCategoryRepository.deleteById(id);
     }
 }
