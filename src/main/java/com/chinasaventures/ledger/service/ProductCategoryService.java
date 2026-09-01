@@ -59,6 +59,7 @@ public class ProductCategoryService {
         }else{
            List <Product> productWithCategory = productRepository.findByCategoryId(id);
            //I should loop through the list above and set each of their category to null, then saveAll.
+            productWithCategory.forEach(product -> {product.setCategory(null);});
         }
 
 
