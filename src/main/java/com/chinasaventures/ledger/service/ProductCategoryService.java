@@ -1,8 +1,10 @@
 package com.chinasaventures.ledger.service;
 
+import com.chinasaventures.ledger.model.Product;
 import com.chinasaventures.ledger.model.ProductCategory;
 import com.chinasaventures.ledger.model.Users;
 import com.chinasaventures.ledger.repository.ProductCategoryRepository;
+import com.chinasaventures.ledger.repository.ProductRepository;
 import com.chinasaventures.ledger.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +20,7 @@ public class ProductCategoryService {
 
     private final ProductCategoryRepository productCategoryRepository;
     private final UsersRepository usersRepository;
+    private final ProductRepository productRepository;
 
     public List<ProductCategory> getAllCategories() {
         return productCategoryRepository.findAll();
@@ -50,7 +53,14 @@ public class ProductCategoryService {
                     org.springframework.http.HttpStatus.FORBIDDEN,
                     "Only a director can delete a Product Category.");
         }
+        boolean hasProduct = productRepository.existsByCategoryId(id);
+        if(!hasProduct){
+            productCategoryRepository.deleteById(id);
+        }else{
+           List <Product> productWithCategory = productRepository.findByCategoryId(id);
+           //I should loop through the list above and set each of their category to null, then saveAll.
+        }
 
-        productCategoryRepository.deleteById(id);
+
     }
 }
