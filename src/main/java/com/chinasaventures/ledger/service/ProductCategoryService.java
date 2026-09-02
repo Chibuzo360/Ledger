@@ -54,14 +54,15 @@ public class ProductCategoryService {
                     "Only a director can delete a Product Category.");
         }
         boolean hasProduct = productRepository.existsByCategoryId(id);
-        if(!hasProduct){
-            productCategoryRepository.deleteById(id);
-        }else{
-           List <Product> productWithCategory = productRepository.findByCategoryId(id);
-           //I should loop through the list above and set each of their category to null, then saveAll.
+
+        if(hasProduct){
+            List <Product> productWithCategory = productRepository.findByCategoryId(id);
+            //I should loop through the list above and set each of their category to null, then saveAll.
             productWithCategory.forEach(product -> {product.setCategory(null);});
+            productRepository.saveAll(productWithCategory);
         }
 
+        productCategoryRepository.deleteById(id);
 
     }
 }
