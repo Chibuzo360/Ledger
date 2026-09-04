@@ -34,4 +34,13 @@ public class TransactionItem {
 
     @Column(name = "supply_status", nullable = false)
     private String supplyStatus = "not_supplied";
+
+    // NEW: free-text note for the "handled elsewhere" case — e.g. a customer
+    // redirected to another branch to complete a partial supply. Deliberately
+    // just a note, not a real per-branch stock movement — BranchStock isn't
+    // wired in yet, so this can't do real cross-branch accounting, it just
+    // makes the situation visible to a director reading the record.
+    // Nullable — most items will never need one.
+    @Column(name = "supply_note")
+    private String supplyNote;
 }
