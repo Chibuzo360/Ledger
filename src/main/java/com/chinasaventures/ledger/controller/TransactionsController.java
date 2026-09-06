@@ -2,7 +2,7 @@ package com.chinasaventures.ledger.controller;
 
 import com.chinasaventures.ledger.dto.ConfirmPaymentRequest;
 import com.chinasaventures.ledger.dto.TransactionResponseDTO; // CHANGED: added
-import com.chinasaventures.ledger.model.Transactions;
+import com.chinasaventures.ledger.dto.CreateTransactionRequest;
 import com.chinasaventures.ledger.service.TransactionsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,8 +33,8 @@ public class TransactionsController {
     // CHANGED: Transactions -> TransactionResponseDTO (request body stays Transactions —
     // that's the incoming shape from the frontend form, unrelated to the response DTO)
     @PostMapping
-    public ResponseEntity<TransactionResponseDTO> createTransaction(@RequestBody Transactions transaction) {
-        return ResponseEntity.ok(transactionsService.addTransaction(transaction));
+    public ResponseEntity<TransactionResponseDTO> createTransaction(@RequestBody CreateTransactionRequest request) {
+        return ResponseEntity.ok(transactionsService.addTransaction(request));
     }
 
     // CHANGED: now takes a JSON body (ConfirmPaymentRequest) instead of @RequestParam fields

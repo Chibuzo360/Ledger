@@ -1,30 +1,31 @@
 package com.chinasaventures.ledger.service;
 
-import com.chinasaventures.ledger.dto.RetailerSummaryDTO;
-import com.chinasaventures.ledger.dto.TransactionResponseDTO;
-import com.chinasaventures.ledger.dto.UserSummaryDTO;
-import com.chinasaventures.ledger.model.Transactions;
-import com.chinasaventures.ledger.repository.TransactionItemRepository;
-import com.chinasaventures.ledger.repository.TransactionsRepository;
-import com.chinasaventures.ledger.repository.ProductRepository;
-import com.chinasaventures.ledger.repository.UsersRepository;
-import com.chinasaventures.ledger.model.Users;
+import com.chinasaventures.ledger.dto.*;
+import com.chinasaventures.ledger.model.*;
+import com.chinasaventures.ledger.repository.*;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // NEW
+import org.springframework.web.server.ResponseStatusException; // NEW
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class TransactionsService {
     private final TransactionsRepository transactionsRepository;
-    private final TransactionItemRepository transactionItemRepository;
+    private final TransactionItemRepository transactionItemRepository; // unused directly now — item creation goes through TransactionItemService instead, see below
     private final ProductRepository productRepository;
+    private final ProductVariantsRepository productVariantsRepository; // NEW — needed to resolve variant prices
     private final UsersRepository usersRepository;
+    private final RetailersRepository retailersRepository; // NEW — assumed plain JpaRepository, same as every other repo here
+    private final TransactionItemService transactionItemService; // NEW — reuses the stock-safety-checked, supplyStatus-deriving logic from last message instead of duplicating it here
 
     private TransactionResponseDTO toDTO(Transactions t) {
         UserSummaryDTO recordedBy = t.getRecordedBy() != null
@@ -34,42 +35,41 @@ public class TransactionsService {
                 ? new UserSummaryDTO(t.getConfirmedBy().getId(), t.getConfirmedBy().getName(), t.getConfirmedBy().getRole())
                 : null;
         RetailerSummaryDTO retailer = t.getRetailer() != null
-                ? new RetailerSummaryDTO(t.getRetailer().getId(), t.getRetailer().getBusinessName(), t.getCustomerName())//updated this to also return customer name
+                ? new RetailerSummaryDTO(t.getRetailer().getId(), t.getRetailer().getBusinessName(), t.getCustomerName())
                 : null;
 
         return new TransactionResponseDTO(
                 t.getId(), t.getCustomerName(), t.getCustomerPhone(),
                 t.getTotalAmount(), t.getAmountPaid(), t.getPaymentStatus(),
                 t.getPaymentType(), t.getPaymentProof(),
-                recordedBy, confirmedBy,retailer , t.getConfirmedAt(), t.getCreatedAt()
+                recordedBy, confirmedBy, retailer, t.getConfirmedAt(), t.getCreatedAt()
         );
     }
 
     public List<TransactionResponseDTO> getAllTransactions() {
-        // swapped findAll() for the ordered version (the last created stays up)
         return transactionsRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
                 .map(this::toDTO)
                 .toList();
     }
 
-    // kept this one returning the raw entity — confirmPayment() and addTransaction()
-    // still need the real Transactions object internally (e.g. to save it), so this stays
-    // as an internal helper. Controller will call toDTO() on the result before responding.
     public Transactions getTransactionById(Long id){
         return transactionsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction not found with id: "+ id));
     }
 
-    // lookup as getTransactionById(), but returns the DTO
-    // for controller use. getTransactionById() stays as-is since confirmPayment() needs
-    // the raw entity internally to modify and save it.
     public TransactionResponseDTO getTransactionByIdDTO(Long id) {
         return toDTO(getTransactionById(id));
     }
 
-    // return type TransactionResponseDTO instead of Transactions
-    public TransactionResponseDTO addTransaction(Transactions transaction){
+    // CHANGED: entire method rewritten. Previously took a raw Transactions
+    // object (with totalAmount already set by whoever called it — trusted,
+    // unvalidated) and never touched items at all. Now takes
+    // CreateTransactionRequest, resolves every item's real Product/Variant,
+    // computes totalAmount server-side from actual prices, and creates the
+    // items alongside the transaction — all as one atomic unit.
+    @Transactional
+    public TransactionResponseDTO addTransaction(CreateTransactionRequest request){
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String identifier = auth.getName();
@@ -77,27 +77,98 @@ public class TransactionsService {
         Users currentUser = usersRepository.findByEmailOrPhoneNumber(identifier, identifier)
                 .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + identifier));
 
+        // NEW: retailer is optional — null means walk-in, same convention
+        // as everywhere else in this app.
+        Retailers retailer = null;
+        if (request.retailerId() != null) {
+            retailer = retailersRepository.findById(request.retailerId())
+                    .orElseThrow(() -> new RuntimeException("Retailer not found with id: " + request.retailerId()));
+        }
+
+        // NEW: resolve every line item's real Product/Variant up front, and
+        // build the (unsaved, not-yet-linked-to-a-transaction) TransactionItem
+        // entities here. Building them now — before totalAmount or the
+        // Transactions row even exist — lets one pass compute both the running
+        // total AND have the fully-populated items ready to save afterward,
+        // instead of hitting the database twice for the same product/variant.
+        List<TransactionItem> itemsToCreate = new ArrayList<>();
+        BigDecimal totalAmount = BigDecimal.ZERO;
+
+        for (TransactionItemRequest itemRequest : request.items()) {
+            Product product = productRepository.findById(itemRequest.productId())
+                    .orElseThrow(() -> new RuntimeException("Product not found with id: " + itemRequest.productId()));
+
+            ProductVariants variant = null;
+            BigDecimal unitPrice = product.getPricePerUnit();
+
+            if (itemRequest.productVariantId() != null) {
+                variant = productVariantsRepository.findById(itemRequest.productVariantId())
+                        .orElseThrow(() -> new RuntimeException("Variant not found with id: " + itemRequest.productVariantId()));
+                unitPrice = variant.getPricePerUnit(); // variant price overrides product price when a variant is picked
+            }
+
+            // Billed on the FULL quantityOrdered, per your confirmed decision —
+            // not quantitySupplied. A partial delivery is a logistics fact,
+            // not a discount; the customer owes for the whole order.
+            BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(itemRequest.quantityOrdered()));
+            totalAmount = totalAmount.add(lineTotal);
+
+            TransactionItem item = new TransactionItem();
+            item.setProduct(product);
+            item.setProductVariant(variant);
+            item.setQuantityOrdered(itemRequest.quantityOrdered());
+            item.setQuantitySupplied(itemRequest.quantitySupplied());
+            item.setSupplyNote(itemRequest.supplyNote());
+            // supplyStatus is NOT set here — addTransactionItem() derives it
+            // server-side from quantityOrdered vs quantitySupplied, same as
+            // paymentType below is derived rather than trusted from input.
+            itemsToCreate.add(item);
+        }
+
+        // NEW: null-safe — request.amountPaid() could be omitted by the
+        // frontend. The entity's own default (0) only applies if we never
+        // call setAmountPaid at all, and here we're building the object by
+        // hand, so this guard has to be explicit.
+        BigDecimal amountPaid = request.amountPaid() != null ? request.amountPaid() : BigDecimal.ZERO;
+
+        Transactions transaction = new Transactions();
+        transaction.setCustomerName(request.customerName());
+        transaction.setCustomerPhone(request.customerPhone());
+        transaction.setTotalAmount(totalAmount); // CHANGED: computed, never trusted from the client
+        transaction.setAmountPaid(amountPaid);
+        transaction.setRetailer(retailer);
         transaction.setRecordedBy(currentUser);
         transaction.setBranch(currentUser.getBranch());
+        transaction.setPaymentStatus("pending");
 
-        BigDecimal debt = transaction.getTotalAmount()
-                .subtract(transaction.getAmountPaid());
-
-        if(debt.compareTo(transaction.getTotalAmount()) == 0) {
+        // Unchanged paymentType logic — same three-way split as before, just
+        // now running against a server-computed totalAmount instead of a
+        // client-supplied one.
+        BigDecimal debt = totalAmount.subtract(amountPaid);
+        if (debt.compareTo(totalAmount) == 0) {
             transaction.setPaymentType("credit");
-        } else if(debt.compareTo(BigDecimal.ZERO) > 0) {
+        } else if (debt.compareTo(BigDecimal.ZERO) > 0) {
             transaction.setPaymentType("part_payment");
         } else {
             transaction.setPaymentType("full");
         }
 
-        transaction.setPaymentStatus("pending");
+        Transactions savedTransaction = transactionsRepository.save(transaction);
 
-        Transactions saved = transactionsRepository.save(transaction);
-        return toDTO(saved); // CHANGED: map before returning
+        // NEW: link each item to the now-saved (id-bearing) transaction, then
+        // create it through TransactionItemService — which runs the
+        // stock-sufficiency check and decrements stock. Because this whole
+        // method is @Transactional, if item 3 of 4 fails here (e.g. not
+        // enough stock), Spring rolls back items 1-2 AND the Transactions
+        // row above, not just item 3's own failed write.
+        for (TransactionItem item : itemsToCreate) {
+            item.setTransaction(savedTransaction);
+            transactionItemService.addTransactionItem(item);
+        }
+
+        return toDTO(savedTransaction);
     }
 
-    // CHANGED: confirmPayment now validates the cap before setting amountPaid
     public TransactionResponseDTO confirmPayment(Long id, BigDecimal amountPaid, String paymentProof) {
         Transactions transaction = getTransactionById(id);
 
@@ -107,12 +178,9 @@ public class TransactionsService {
                 .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + identifier));
 
         if (amountPaid != null) {
-            // NEW: guard — can't record more than what's actually owed
             if (amountPaid.compareTo(transaction.getTotalAmount()) > 0) {
-                throw new org.springframework.web.server.ResponseStatusException(
-                        org.springframework.http.HttpStatus.BAD_REQUEST,
-                        "Amount paid cannot exceed total amount owed"
-                );
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Amount paid cannot exceed total amount owed");
             }
             transaction.setAmountPaid(amountPaid);
 
@@ -126,26 +194,23 @@ public class TransactionsService {
             }
         }
 
-        // In TransactionsService.addTransaction() — CHANGED: check if the frontend already marked this confirmed
+        // NOT CHANGED — this is the tautological bug flagged above. Left
+        // exactly as-is pending your decision on whether to fix it now.
         if ("confirmed".equalsIgnoreCase(transaction.getPaymentStatus())) {
             transaction.setPaymentStatus("confirmed");
             transaction.setConfirmedBy(currentUser);
             transaction.setConfirmedAt(LocalDateTime.now());
         } else {
-            transaction.setPaymentStatus("pending"); // unchanged default
+            transaction.setPaymentStatus("pending");
         }
-        transaction.setPaymentProof(paymentProof);
         transaction.setConfirmedAt(LocalDateTime.now());
         transaction.setConfirmedBy(currentUser);
+        transaction.setPaymentProof(paymentProof);
 
         Transactions saved = transactionsRepository.save(transaction);
         return toDTO(saved);
-        // in the next version, updating a transaction will involve finding the first instance of that transaction,
-        // and the branching it, creating a new transaction that is connected to the former one
-        // that way, youll be able to see the time when the txn is updated every single time
     }
 
-    // CHANGED: deleteTransaction now checks who's deleting and what state the transaction is in
     public void deleteTransaction(Long id){
         Transactions transaction = getTransactionById(id);
 
@@ -154,12 +219,9 @@ public class TransactionsService {
         Users currentUser = usersRepository.findByEmailOrPhoneNumber(identifier, identifier)
                 .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + identifier));
 
-        // NEW: confirmed transactions can only be deleted by a director
         if ("confirmed".equals(transaction.getPaymentStatus()) && !"director".equals(currentUser.getRole())) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                    org.springframework.http.HttpStatus.FORBIDDEN,
-                    "Only a director can delete a confirmed transaction"
-            );
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only a director can delete a confirmed transaction");
         }
 
         transactionsRepository.deleteById(id);
