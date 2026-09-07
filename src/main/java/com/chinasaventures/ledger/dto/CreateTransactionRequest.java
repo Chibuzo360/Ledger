@@ -9,6 +9,7 @@ public record CreateTransactionRequest(
         String customerName,
         String customerPhone,
         BigDecimal amountPaid,
+        BigDecimal discountAmount, //Treated as 0 by default
         Long retailerId, // null for a walk-in customer
         List<TransactionItemRequest> items
 ) {}

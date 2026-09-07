@@ -7,5 +7,6 @@ public record TransactionItemResponseDTO(
         ProductVariantSummaryDTO productVariant,
         int quantityOrdered,
         int quantitySupplied,
-        String supplyStatus
+        String supplyStatus,
+        String supplyNote
 ) {}

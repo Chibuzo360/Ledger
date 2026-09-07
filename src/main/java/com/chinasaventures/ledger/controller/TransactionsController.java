@@ -32,6 +32,7 @@ public class TransactionsController {
 
     // CHANGED: Transactions -> TransactionResponseDTO (request body stays Transactions —
     // that's the incoming shape from the frontend form, unrelated to the response DTO)
+    //UPDATE
     @PostMapping
     public ResponseEntity<TransactionResponseDTO> createTransaction(@RequestBody CreateTransactionRequest request) {
         return ResponseEntity.ok(transactionsService.addTransaction(request));

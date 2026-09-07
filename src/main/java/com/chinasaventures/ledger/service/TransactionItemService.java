@@ -70,9 +70,8 @@ public class TransactionItemService {
                 txnItem.getProductVariant().getCurrentStock()
         ) : null;
 
-        // CHANGED: supplyNote appended — remember to add the matching
-        // component to TransactionItemResponseDTO (record) and this
-        // constructor call has to stay positionally in sync with it.
+        // supplyNote appended
+        // done.
         return new TransactionItemResponseDTO(
                 txnItem.getId(), transaction, product, productVariant,
                 txnItem.getQuantityOrdered(), txnItem.getQuantitySupplied(),

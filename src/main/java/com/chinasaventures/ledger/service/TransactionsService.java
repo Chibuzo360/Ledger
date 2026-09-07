@@ -3,6 +3,7 @@ package com.chinasaventures.ledger.service;
 import com.chinasaventures.ledger.dto.*;
 import com.chinasaventures.ledger.model.*;
 import com.chinasaventures.ledger.repository.*;
+import com.chinasaventures.ledger.service.DiscountSettingsService;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,9 @@ public class TransactionsService {
     private final ProductVariantsRepository productVariantsRepository; // NEW — needed to resolve variant prices
     private final UsersRepository usersRepository;
     private final RetailersRepository retailersRepository; // NEW — assumed plain JpaRepository, same as every other repo here
-    private final TransactionItemService transactionItemService; // NEW — reuses the stock-safety-checked, supplyStatus-deriving logic from last message instead of duplicating it here
+    private final TransactionItemService transactionItemService;
+    private final DiscountSettingsService discountSettingsService;
+
 
     private TransactionResponseDTO toDTO(Transactions t) {
         UserSummaryDTO recordedBy = t.getRecordedBy() != null
@@ -77,8 +80,6 @@ public class TransactionsService {
         Users currentUser = usersRepository.findByEmailOrPhoneNumber(identifier, identifier)
                 .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + identifier));
 
-        // NEW: retailer is optional — null means walk-in, same convention
-        // as everywhere else in this app.
         Retailers retailer = null;
         if (request.retailerId() != null) {
             retailer = retailersRepository.findById(request.retailerId())
@@ -129,7 +130,25 @@ public class TransactionsService {
         // frontend. The entity's own default (0) only applies if we never
         // call setAmountPaid at all, and here we're building the object by
         // hand, so this guard has to be explicit.
+        BigDecimal subtotal = totalAmount;
         BigDecimal amountPaid = request.amountPaid() != null ? request.amountPaid() : BigDecimal.ZERO;
+
+        BigDecimal discountAmount = request.discountAmount() != null ? request.discountAmount() : BigDecimal.ZERO;
+        if (discountAmount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Discount cannot be negative.");
+        }
+
+        BigDecimal maxAllowedDiscount = discountSettingsService.getOrCreateSettings().getMaxDiscountAmount();
+        if (discountAmount.compareTo(maxAllowedDiscount) > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Discount of ₦" + discountAmount + " exceeds the approved cap of ₦" + maxAllowedDiscount + ".");
+        }
+        if (discountAmount.compareTo(subtotal) > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Discount cannot exceed the sale's subtotal.");
+        }
+
+        totalAmount = subtotal.subtract(discountAmount);
+        transaction.setDiscountAmount(discountAmount);
 
         Transactions transaction = new Transactions();
         transaction.setCustomerName(request.customerName());
