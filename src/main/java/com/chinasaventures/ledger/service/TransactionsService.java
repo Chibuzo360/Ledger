@@ -148,13 +148,14 @@ public class TransactionsService {
         }
 
         totalAmount = subtotal.subtract(discountAmount);
-        transaction.setDiscountAmount(discountAmount);
+
 
         Transactions transaction = new Transactions();
         transaction.setCustomerName(request.customerName());
         transaction.setCustomerPhone(request.customerPhone());
         transaction.setTotalAmount(totalAmount); // CHANGED: computed, never trusted from the client
         transaction.setAmountPaid(amountPaid);
+        transaction.setDiscountAmount(discountAmount);
         transaction.setRetailer(retailer);
         transaction.setRecordedBy(currentUser);
         transaction.setBranch(currentUser.getBranch());
@@ -213,17 +214,13 @@ public class TransactionsService {
             }
         }
 
-        // NOT CHANGED — this is the tautological bug flagged above. Left
-        // exactly as-is pending your decision on whether to fix it now.
-        if ("confirmed".equalsIgnoreCase(transaction.getPaymentStatus())) {
-            transaction.setPaymentStatus("confirmed");
-            transaction.setConfirmedBy(currentUser);
-            transaction.setConfirmedAt(LocalDateTime.now());
-        } else {
-            transaction.setPaymentStatus("pending");
-        }
-        transaction.setConfirmedAt(LocalDateTime.now());
+        // CHANGED: always confirms — this endpoint's entire purpose is to confirm
+// payment, so it shouldn't conditionally check the transaction's own
+// current status first. See earlier chat notes for why the old check
+// could never be true on a real call.
+        transaction.setPaymentStatus("confirmed");
         transaction.setConfirmedBy(currentUser);
+        transaction.setConfirmedAt(LocalDateTime.now());
         transaction.setPaymentProof(paymentProof);
 
         Transactions saved = transactionsRepository.save(transaction);

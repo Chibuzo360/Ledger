@@ -52,7 +52,7 @@ public class Transactions {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "retailer_id")
-    private Retailers retailer; // probably added this newly. modify the service and controller if need be
+    private Retailers retailer;
 
     @Column(name = "discount_amount", nullable = false)
     private BigDecimal discountAmount = BigDecimal.ZERO;
