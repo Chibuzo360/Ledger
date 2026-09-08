@@ -9,6 +9,7 @@ public record TransactionResponseDTO(
         String customerName,
         String customerPhone,
         BigDecimal totalAmount,
+        BigDecimal discountAmount, // NEW
         BigDecimal amountPaid,
         String paymentStatus,
         String paymentType,

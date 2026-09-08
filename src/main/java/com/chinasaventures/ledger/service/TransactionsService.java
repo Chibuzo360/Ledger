@@ -43,7 +43,7 @@ public class TransactionsService {
 
         return new TransactionResponseDTO(
                 t.getId(), t.getCustomerName(), t.getCustomerPhone(),
-                t.getTotalAmount(), t.getAmountPaid(), t.getPaymentStatus(),
+                t.getTotalAmount(), t.getAmountPaid(),t.getDiscountAmount(), t.getPaymentStatus(),
                 t.getPaymentType(), t.getPaymentProof(),
                 recordedBy, confirmedBy, retailer, t.getConfirmedAt(), t.getCreatedAt()
         );
