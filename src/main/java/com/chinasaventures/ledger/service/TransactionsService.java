@@ -227,6 +227,7 @@ public class TransactionsService {
         return toDTO(saved);
     }
 
+    @Transactional
     public void deleteTransaction(Long id){
         Transactions transaction = getTransactionById(id);
 
@@ -239,7 +240,7 @@ public class TransactionsService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "Only a director can delete a confirmed transaction");
         }
-
+        transactionItemRepository.deleteByTransactionId(id);
         transactionsRepository.deleteById(id);
     }
 }

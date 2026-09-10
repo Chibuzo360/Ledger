@@ -12,4 +12,5 @@ import java.util.List;
 public interface TransactionItemRepository extends JpaRepository<TransactionItem, Long>{
     List<TransactionItem> findByTransactionId(Long transactionId);
     List<TransactionItem> findByTransaction_Retailer_Id(Long retailerId);
+    void deleteByTransactionId(Long transactionId);
 }

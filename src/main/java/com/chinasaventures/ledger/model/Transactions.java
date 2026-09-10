@@ -54,7 +54,7 @@ public class Transactions {
     @JoinColumn(name = "retailer_id")
     private Retailers retailer;
 
-    @Column(name = "discount_amount", nullable = false, columnDefinition = "NUMERIC(19,2) DEFAULT 0")// new: I added a new default discount value to enable table creation.
+    @Column(name = "discount_amount", nullable = false)
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
     @Column(name = "created_at")
