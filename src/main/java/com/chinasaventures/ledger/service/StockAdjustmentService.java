@@ -81,18 +81,34 @@ public class StockAdjustmentService {
         Product product = productRepository.findById(request.productId())
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + request.productId()));
 
+        // NEW: resolve the variant (if any) up front so we can check for a
+        // no-op BEFORE writing anything — previously nothing stopped a
+        // submission where newStock equals the current value, which wrote
+        // a real audit-log row claiming a change happened when nothing
+        // actually moved. Hibernate's dirty-checking silently skipped the
+        // UPDATE in that case (correct behavior on its end), but the log
+        // entry itself was still misleading either way.
+        ProductVariants variant = null;
+        if (request.productVariantId() != null) {
+            variant = productVariantsRepository.findById(request.productVariantId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Variant not found with id: " + request.productVariantId()));
+        }
+
+        Integer currentValue = variant != null ? variant.getCurrentStock() : product.getCurrentStock();
+        if (request.newStock().equals(currentValue)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "New stock value is the same as the current stock — nothing to adjust.");
+        }
+
         StockAdjustment adjustment = new StockAdjustment();
         adjustment.setProduct(product);
         adjustment.setAdjustedBy(currentUser);
         adjustment.setBranch(currentUser.getBranch());
         adjustment.setReason(request.reason());
 
-        if (request.productVariantId() != null) {
+        if (variant != null) {
             // Variant path: the variant's own currentStock is what actually moves.
-            ProductVariants variant = productVariantsRepository.findById(request.productVariantId())
-                    .orElseThrow(() -> new RuntimeException(
-                            "Variant not found with id: " + request.productVariantId()));
-
             adjustment.setProductVariant(variant);
             adjustment.setPreviousStock(variant.getCurrentStock());
             adjustment.setNewStock(request.newStock());
