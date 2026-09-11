@@ -20,8 +20,12 @@ public class StockAdjustment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // CHANGED: was nullable = false. A product can now be deleted while
+    // this history row survives — when that happens, this FK is nullified
+    // (not the row deleted), so it has to be optional. productNameSnapshot
+    // below is what keeps the row readable once this goes null.
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id")
     private Product product;
 
     // Optional — same nullable pattern as StockIn.productVariant, since not
@@ -29,6 +33,13 @@ public class StockAdjustment {
     @ManyToOne
     @JoinColumn(name = "product_variant_id")
     private ProductVariants productVariant;
+
+    // NEW: captured once, at creation, and never touched again — same
+    // "snapshot" pattern an invoice uses to store a product's name as text
+    // instead of just an ID. Once `product` goes null (product deleted),
+    // this is the only thing left that says what this adjustment was for.
+    @Column(nullable = false)
+    private String productNameSnapshot;
 
     @Column(nullable = false)
     private Integer previousStock;

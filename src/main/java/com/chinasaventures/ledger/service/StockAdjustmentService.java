@@ -24,6 +24,10 @@ public class StockAdjustmentService {
     private final ProductVariantsRepository productVariantsRepository;
     private final UsersRepository usersRepository;
 
+    // CHANGED: product can now be null (deleted, reference nullified) — the
+    // DTO falls back to productNameSnapshot in that case instead of NPE-ing
+    // on p.getName(). productId in the DTO is null when the product is gone,
+    // which the frontend can use to know not to link to it anymore.
     private StockAdjustmentResponseDTO toDTO(StockAdjustment a) {
         Product p = a.getProduct();
         ProductVariants v = a.getProductVariant();
@@ -34,8 +38,8 @@ public class StockAdjustmentService {
 
         return new StockAdjustmentResponseDTO(
                 a.getId(),
-                p.getId(),
-                p.getName(),
+                p != null ? p.getId() : null,
+                p != null ? p.getName() : a.getProductNameSnapshot(),
                 v != null ? v.getId() : null,
                 variantDescription,
                 a.getPreviousStock(),
@@ -103,6 +107,7 @@ public class StockAdjustmentService {
 
         StockAdjustment adjustment = new StockAdjustment();
         adjustment.setProduct(product);
+        adjustment.setProductNameSnapshot(product.getName()); // NEW — captured once, survives product deletion
         adjustment.setAdjustedBy(currentUser);
         adjustment.setBranch(currentUser.getBranch());
         adjustment.setReason(request.reason());
@@ -140,5 +145,26 @@ public class StockAdjustmentService {
                 .stream()
                 .map(this::toDTO)
                 .toList();
+    }
+
+    // NEW: the deliberate "wipe everything before deployment" action —
+    // separate from the automatic nullify-on-product-delete path in
+    // ProductService. Director-only, same service-layer check pattern as
+    // everywhere else. No confirmation step here in the service itself —
+    // that responsibility belongs to the frontend (a real "type WIPE to
+    // confirm" style guard, given this is irreversible and total).
+    @Transactional
+    public void wipeAllHistory() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String identifier = auth.getName();
+        Users currentUser = usersRepository.findByEmailOrPhoneNumber(identifier, identifier)
+                .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + identifier));
+
+        if (!"director".equals(currentUser.getRole())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only a director can wipe stock adjustment history.");
+        }
+
+        stockAdjustmentRepository.deleteAllAdjustments();
     }
 }

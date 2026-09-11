@@ -33,4 +33,15 @@ public class StockAdjustmentController {
     public ResponseEntity<List<StockAdjustmentResponseDTO>> getHistoryForVariant(@PathVariable Long variantId) {
         return ResponseEntity.ok(stockAdjustmentService.getHistoryForVariant(variantId));
     }
+
+    // NEW: the one exception to "no PUT/DELETE" on this controller — this
+    // isn't editing a record, it's the deliberate full wipe. Director-only,
+    // enforced in the service. Intentionally has no query params/filters —
+    // wipes everything, on purpose, matching the "everything" scope you
+    // asked for.
+    @DeleteMapping
+    public ResponseEntity<Void> wipeAllHistory() {
+        stockAdjustmentService.wipeAllHistory();
+        return ResponseEntity.noContent().build();
+    }
 }
