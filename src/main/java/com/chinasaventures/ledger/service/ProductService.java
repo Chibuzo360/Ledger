@@ -5,6 +5,7 @@ import com.chinasaventures.ledger.model.Users;
 import com.chinasaventures.ledger.repository.ProductRepository;
 import com.chinasaventures.ledger.repository.UsersRepository;
 import com.chinasaventures.ledger.repository.ProductVariantsRepository;
+import com.chinasaventures.ledger.repository.StockAdjustmentRepository; // NEW
 import com.chinasaventures.ledger.dto.ProductSummaryDTO;
 import com.chinasaventures.ledger.dto.ProductCategoryDTO;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // NEW
 
 import java.util.List;
 
@@ -21,6 +23,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final UsersRepository usersRepository;
     private final ProductVariantsRepository productVariantsRepository;
+    private final StockAdjustmentRepository stockAdjustmentRepository; // NEW
 
     public ProductSummaryDTO toDTO (Product p){
         ProductCategoryDTO productCategory = p.getCategory() != null
@@ -63,15 +66,18 @@ public class ProductService {
         return toDTO(upToDateProduct);
     }
 
+    // CHANGED: added @Transactional — this is now two writes (nullify the
+    // StockAdjustment rows, then delete the product) that must succeed or
+    // fail together. Without it, a crash between the two could leave
+    // adjustment rows pointing at a product ID that no longer exists,
+    // which would break the history GET endpoint on its next fetch.
+    @Transactional
     public void deleteProduct(Long id){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String identifier = auth.getName();
 
         Users currentUser = usersRepository.findByEmailOrPhoneNumber(identifier, identifier)
                 .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + identifier));
-        //  look up the Users via usersRepository.findByEmailOrPhoneNumber(...)
-        // if currentUser's role isn't "director", throw
-        //         ResponseStatusException(HttpStatus.FORBIDDEN, "...")
 
         if(!"director".equals(currentUser.getRole())){
             throw new org.springframework.web.server.ResponseStatusException(
@@ -81,6 +87,12 @@ public class ProductService {
 
         boolean isPresent = productVariantsRepository.existsByProductId(id);
         if(!isPresent) {
+            // NEW: detach (not delete) this product's StockAdjustment history
+            // BEFORE deleting the product itself — otherwise Postgres blocks
+            // the delete with the same FK-violation shape TransactionItem hit
+            // against Transactions. StockAdjustment.productNameSnapshot is
+            // what keeps these rows readable once product goes null here.
+            stockAdjustmentRepository.nullifyProductReference(id);
             productRepository.deleteById(id);
         }else{
             throw new org.springframework.web.server.ResponseStatusException(
