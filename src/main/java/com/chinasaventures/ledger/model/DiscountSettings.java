@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 // Single-row table by convention — there is only ever one of these. Not
-// tied to Branch (you said global, not per-branch) or any other entity;
+// tied to Branch or any other entity;
 // a business-wide setting like this doesn't conceptually belong to any
 // existing table, so it gets its own.
 @Data

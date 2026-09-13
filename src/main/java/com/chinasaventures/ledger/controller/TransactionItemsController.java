@@ -1,9 +1,9 @@
 package com.chinasaventures.ledger.controller;
 
 
+import com.chinasaventures.ledger.dto.SupplyRemainingRequest;
 import com.chinasaventures.ledger.dto.TransactionItemResponseDTO;
 import com.chinasaventures.ledger.model.TransactionItem;
-//import com.chinasaventures.ledger.service.ProductService;
 import com.chinasaventures.ledger.service.TransactionItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,7 @@ public class TransactionItemsController {
     @GetMapping("/transaction/{transactionId}")
     public ResponseEntity<List<TransactionItemResponseDTO>> getItemsByTransactionId(@PathVariable Long transactionId){
         return ResponseEntity.ok(transactionItemService.getItemsByTransactionId(transactionId));
-    }// I fixed the problem, it was from the "getItemsBy..." in the Response entity.ok
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<TransactionItemResponseDTO> getTransactionItemsById(@PathVariable Long id){
@@ -42,6 +42,15 @@ public class TransactionItemsController {
     @PostMapping
     public ResponseEntity<TransactionItemResponseDTO> addTransactionItem(@RequestBody TransactionItem transactionItem) {
         return ResponseEntity.ok(transactionItemService.addTransactionItem(transactionItem));
+    }
+
+    // NEW: completes (fully or partially) an item that still owes units —
+    // e.g. the rest of a partial delivery arriving from a later restock.
+    @PutMapping("/{id}/supply")
+    public ResponseEntity<TransactionItemResponseDTO> supplyRemaining(
+            @PathVariable Long id,
+            @RequestBody SupplyRemainingRequest request) {
+        return ResponseEntity.ok(transactionItemService.supplyRemaining(id, request));
     }
 
     @DeleteMapping("/{id}")
