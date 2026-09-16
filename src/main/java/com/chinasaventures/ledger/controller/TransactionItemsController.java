@@ -45,7 +45,7 @@ public class TransactionItemsController {
     }
 
     // NEW: completes (fully or partially) an item that still owes units —
-    // e.g. the rest of a partial delivery arriving from a later restock.
+    // e.g. the rest of a partial delivery arriving from a later re stock.
     @PutMapping("/{id}/supply")
     public ResponseEntity<TransactionItemResponseDTO> supplyRemaining(
             @PathVariable Long id,
