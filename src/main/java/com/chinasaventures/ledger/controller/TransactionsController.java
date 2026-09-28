@@ -17,7 +17,6 @@ public class TransactionsController {
 
     private final TransactionsService transactionsService;
 
-    // CHANGED: List<Transactions> -> List<TransactionResponseDTO>
     @GetMapping
     public ResponseEntity<List<TransactionResponseDTO>> getAllTransactions() {
         return ResponseEntity.ok(transactionsService.getAllTransactions());
@@ -38,7 +37,7 @@ public class TransactionsController {
         return ResponseEntity.ok(transactionsService.addTransaction(request));
     }
 
-    // CHANGED: now takes a JSON body (ConfirmPaymentRequest) instead of @RequestParam fields
+    //  now takes a JSON body (ConfirmPaymentRequest) instead of @RequestParam fields
     @PutMapping("/{id}/confirm")
     public ResponseEntity<TransactionResponseDTO> confirmPayment(
             @PathVariable Long id,

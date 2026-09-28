@@ -96,6 +96,9 @@ public class TransactionItemService {
         return transactionItemRepository.findByTransaction_Retailer_Id(retailerId).stream().map(this::toDTO).toList();
     }
 
+    // Called ONLY by TransactionsService.addTransaction() for each line of a
+    // sale. No public endpoint reaches it any more, so it needs no role check
+    // of its own: every caller is an authenticated user recording a sale.
     @Transactional
     public TransactionItemResponseDTO addTransactionItem(TransactionItem transactionItem){
 
@@ -142,16 +145,14 @@ public class TransactionItemService {
         return toDTO(saved);
     }
 
-    public void deleteTransactionItem(Long id){
-        transactionItemRepository.deleteById(id);
-    }
-
-    // NEW: completes (fully or partially) a previously partial delivery.
+    // Completes (fully or partially) a previously partial delivery.
     // additionalQuantity is added to the EXISTING quantitySupplied — this
     // method never touches quantityOrdered or re-decrements the amount
     // already supplied earlier. Stock only ever moves by the NEW amount
     // leaving today, same principle as addTransactionItem()'s original
     // stock decrement.
+    // NOTE: no role check here. Assumed intentional (workers complete
+    // partial deliveries) but not yet confirmed with Asogwa.
     @Transactional
     public TransactionItemResponseDTO supplyRemaining(Long id, SupplyRemainingRequest request) {
         TransactionItem item = getTransactionItemById(id);

@@ -1,4 +1,3 @@
-// controller/DiscountSettingsController.java
 package com.chinasaventures.ledger.controller;
 
 import com.chinasaventures.ledger.dto.DiscountSettingsDTO;
@@ -25,5 +24,19 @@ public class DiscountSettingsController {
     @PutMapping
     public ResponseEntity<DiscountSettingsDTO> updateSettings(@RequestBody UpdateMaxDiscountRequest request) {
         return ResponseEntity.ok(discountSettingsService.updateMaxDiscount(request.maxDiscountAmount()));
+    }
+
+    // NEW
+    public record UpdateWorkerConfirmationRequest(Boolean allowWorkerConfirmation) {}
+
+    // NEW: separate endpoint rather than folding into the existing PUT --
+    // keeps the discount cap and the confirmation toggle as two
+    // independent updates, so changing one can never accidentally touch
+    // the other.
+    @PutMapping("/worker-confirmation")
+    public ResponseEntity<DiscountSettingsDTO> updateWorkerConfirmation(
+            @RequestBody UpdateWorkerConfirmationRequest request) {
+        return ResponseEntity.ok(
+                discountSettingsService.updateAllowWorkerConfirmation(request.allowWorkerConfirmation()));
     }
 }

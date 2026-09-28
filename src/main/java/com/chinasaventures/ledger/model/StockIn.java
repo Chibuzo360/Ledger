@@ -17,8 +17,16 @@ public class StockIn {
     @JoinColumn(name = "product_variant_id")
     private ProductVariants productVariant;
 
+    // CHANGED: was @JoinColumn(name = "product") -- every other FK column
+    // in this codebase uses the "_id" suffix convention (product_id,
+    // branch_id, retailer_id, etc). Fixed to match. NOTE: ddl-auto:update
+    // can only ADD columns, never rename -- if stock_in has any existing
+    // rows, the old "product" column will be left behind, orphaned and
+    // unused, while a fresh empty "product_id" column gets added. If
+    // there's test data in this table, drop it and let it regenerate
+    // clean, same as was done for stock_adjustments earlier.
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product")
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)

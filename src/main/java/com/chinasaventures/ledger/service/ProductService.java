@@ -50,12 +50,28 @@ public class ProductService {
     public ProductSummaryDTO getProductDTOById(Long id){return toDTO(getProductById(id));}
 
     public ProductSummaryDTO createProduct(Product product){
-        // will consider adding a "recordedBy" column to its entity
+        // Made this director only so that workers won't make product creation messy
+        // only the director dictate the format of creation of new products.
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String identifier = auth.getName();
+
+        Users currentUser = usersRepository.findByEmailOrPhoneNumber(identifier, identifier)
+                .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + identifier));
+
+        if(!"director".equals(currentUser.getRole())){
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.FORBIDDEN,
+                    "Only a director can delete a Product");
+        }
+
         Product savedProduct = productRepository.save(product);
         return  toDTO(savedProduct);
     }
 
+    // Not adding role check here yet. ChangedBy will be introduced in v2
+    // no role check so that if price changes, staffs will be able to change the price.
     public ProductSummaryDTO updateProduct(Long id, Product updatedProduct){
+
         Product existing = getProductById(id);
         existing.setName(updatedProduct.getName());
         existing.setPricePerUnit(updatedProduct.getPricePerUnit());

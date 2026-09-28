@@ -1,9 +1,7 @@
 package com.chinasaventures.ledger.controller;
 
-
 import com.chinasaventures.ledger.dto.SupplyRemainingRequest;
 import com.chinasaventures.ledger.dto.TransactionItemResponseDTO;
-import com.chinasaventures.ledger.model.TransactionItem;
 import com.chinasaventures.ledger.service.TransactionItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +12,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/transaction_item")
 @RequiredArgsConstructor
-
 public class TransactionItemsController {
 
     private final TransactionItemService transactionItemService;
@@ -39,23 +36,17 @@ public class TransactionItemsController {
         return ResponseEntity.ok(transactionItemService.getItemsByRetailerId(retailerId));
     }
 
-    @PostMapping
-    public ResponseEntity<TransactionItemResponseDTO> addTransactionItem(@RequestBody TransactionItem transactionItem) {
-        return ResponseEntity.ok(transactionItemService.addTransactionItem(transactionItem));
-    }
+    // REMOVED: standalone POST and DELETE. Line items are now created ONLY
+    // through TransactionsService.addTransaction() and removed ONLY by
+    // deleting the parent transaction, so totalAmount, paymentType and
+    // stock can never drift out of sync with the items.
 
-    // NEW: completes (fully or partially) an item that still owes units —
-    // e.g. the rest of a partial delivery arriving from a later re stock.
+    // Completes (fully or partially) an item that still owes units, e.g.
+    // the rest of a partial delivery arriving from a later restock.
     @PutMapping("/{id}/supply")
     public ResponseEntity<TransactionItemResponseDTO> supplyRemaining(
             @PathVariable Long id,
             @RequestBody SupplyRemainingRequest request) {
         return ResponseEntity.ok(transactionItemService.supplyRemaining(id, request));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTransactionItem(@PathVariable Long id){
-        transactionItemService.deleteTransactionItem(id);
-        return  ResponseEntity.noContent().build();
     }
 }
