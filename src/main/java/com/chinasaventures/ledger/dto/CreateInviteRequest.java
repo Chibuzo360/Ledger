@@ -1,4 +1,3 @@
 package com.chinasaventures.ledger.dto;
 
-public class CreateInviteRequest {
-}
+public record CreateInviteRequest(String role) {} // NEW

@@ -1,6 +1,6 @@
 package com.chinasaventures.ledger.dto;
 
-public record RegisterRequestDTO(
+public record RegisterRequest(
         String name,
         String email,
         String phoneNumber,

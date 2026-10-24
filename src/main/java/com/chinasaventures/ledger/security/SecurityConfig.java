@@ -36,8 +36,8 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/branch/**","/error").permitAll()
-                        .anyRequest().authenticated()
+// CHANGED: /api/branch/** is gone; /api/auth/** narrowed to just login + register
+                                .requestMatchers("/api/auth/login", "/api/auth/register", "/error").permitAll()                        .anyRequest().authenticated()
                         //every other endpoint requires to be authenticated, except the end points mentioned
                 )
                 .exceptionHandling(exception -> exception

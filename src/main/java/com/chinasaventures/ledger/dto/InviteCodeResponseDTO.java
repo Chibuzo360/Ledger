@@ -1,4 +1,5 @@
 package com.chinasaventures.ledger.dto;
 
-public class InviteCodeResponseDTO {
-}
+import java.time.LocalDateTime;
+
+public record InviteCodeResponseDTO(String code, String role, LocalDateTime expiresAt) {} // NEW

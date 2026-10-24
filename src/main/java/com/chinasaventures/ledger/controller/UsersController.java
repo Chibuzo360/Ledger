@@ -1,5 +1,6 @@
 package com.chinasaventures.ledger.controller;
 
+import com.chinasaventures.ledger.dto.UserResponseDTO;
 import com.chinasaventures.ledger.model.Users;
 import com.chinasaventures.ledger.service.UsersService;
 import lombok.RequiredArgsConstructor;
@@ -11,33 +12,32 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-
 public class UsersController {
 
     private final UsersService usersService;
 
     @GetMapping
-    public ResponseEntity<List<Users>> getAllUsers(){
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers(){
         return ResponseEntity.ok(usersService.getAllUsers());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Users> getUsersById(@PathVariable Long id){
-        return ResponseEntity.ok(usersService.getUserById(id));
+    public ResponseEntity<UserResponseDTO> getUsersById(@PathVariable Long id){
+        return ResponseEntity.ok(usersService.getUserDTOById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Users> createUser(@RequestBody Users user){
-        return ResponseEntity.ok(usersService.createUser(user));
+    public ResponseEntity<UserResponseDTO> createUser(@RequestBody Users user){
+        return ResponseEntity.ok(usersService.createUserAsDirector(user));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Users> updateUsers(@PathVariable Long id, @RequestBody Users updatedUser){
-        return ResponseEntity.ok(usersService.updateUsers(id,updatedUser));
+    public ResponseEntity<UserResponseDTO> updateUsers(@PathVariable Long id, @RequestBody Users updatedUser){
+        return ResponseEntity.ok(usersService.updateUsers(id, updatedUser));
     }
 
     @PutMapping("/{id}/password")
-    public ResponseEntity<Users> updatePassword( @PathVariable Long id, @RequestBody String newPassword){
+    public ResponseEntity<UserResponseDTO> updatePassword(@PathVariable Long id, @RequestBody String newPassword){
         return ResponseEntity.ok(usersService.updatePassword(id, newPassword));
     }
 
@@ -47,5 +47,3 @@ public class UsersController {
         return ResponseEntity.noContent().build();
     }
 }
-
-//everything concerning branchstock can wait for now.  maybe after i finish building the core parts i would add it. i only  wrote the model,repo and controller, then commented the codes in it. i didnt modify any file to connect it, i will do those later
