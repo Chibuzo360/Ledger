@@ -11,4 +11,4 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/app.jar app.jar
 EXPOSE 3000
-ENTRYPOINT ["java", "-jar", "app.jar"]
+   CMD ["java", "-Xmx256m", "-XX:+UseSerialGC", "-jar", "/app/app.jar"]
